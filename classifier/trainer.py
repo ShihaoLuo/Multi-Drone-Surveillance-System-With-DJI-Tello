@@ -63,6 +63,5 @@ def create_possample():
 
 
 # process_negpic('negative/')
-img = cv2.imread('../env_pics/0_3_270_1.jpg', 0 )
+img = cv2.imread('../env_pics/0_3_270_1.jpg', 0)
 select_roi(img)
-create_possample()
