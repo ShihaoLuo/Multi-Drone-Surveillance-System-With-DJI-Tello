@@ -1,5 +1,29 @@
 import numpy as np
 import cv2 as cv
+import json
+
+class pose_estimater():
+    def __init__(self):
+        self.camera_matrix = None
+        self.distor_matrix = None
+
+    def loaddata(self):
+        self.camera_matrix = np.load('dataset/camera_matrix_tello.npy')
+        self.distor_matrix = np.load('dataset/distor_matrix_tello.npy')
+
+    def read_from_jason(self, _file):
+        result = []
+        with open(_file) as json_file:
+            data = json.load(json_file)
+            cnt = 0
+            while (data.__contains__('KeyPoint_%d' % cnt)):
+                pt = cv.KeyPoint(x=data['KeyPoint_%d' % cnt][0]['x'],
+                                 y=data['KeyPoint_%d' % cnt][1]['y'],
+                                 _size=data['KeyPoint_%d' % cnt][2]['size'])
+                result.append(pt)
+                cnt += 1
+        return result
+
 
 pt1 = np.array([37.8, 70.16, 1])
 pt2 = np.array([257.13, 70.688, 1])

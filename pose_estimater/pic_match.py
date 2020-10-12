@@ -74,8 +74,8 @@ surf_paras = dict(hessianThreshold=100,
                   upright=1)
 surf = cv.xfeatures2d.SURF_create(**surf_paras)
 kp_query, des_query = surf.detectAndCompute(img_query, None)
-save_2_jason('kp_query.jason', kp_query)
-save_2_npy('des_query.npy', des_query)
+#save_2_jason('kp_query.jason', kp_query)
+#save_2_npy('des_query.npy', des_query)
 kp_test, des_test = surf.detectAndCompute(img_test, None)
 #kp_query_1 = read_from_jason('kp_goodm.jason')
 #des_query_1 = read_from_npy('des_goodm.npy')
@@ -91,7 +91,7 @@ good = []
 kp_good_match_query = []
 des_good_match_query = []
 for m, n in matches:
-    if m.distance < 0.5*n.distance:
+    if m.distance < 0.6*n.distance:
         good.append(m)
         print('--------------------\n')
         print('m.imgIdx: {}\n'.format(m.imgIdx))
@@ -105,9 +105,8 @@ print('the num of finding featurs of query is {}\n'.format(len(des_query)))
 print('the num of finding featurs of test is {}\n'.format(len(des_test)))
 print('the num of finding matches is {}\n'.format(len(matches)))
 print("the len of good match is {}\n".format(len(good)))
-# save_2_jason('kp_goodm.jason',kp_good_match_query)
-# save_2_npy('des_goodm.npy',des_good_match_query)
-
+save_2_jason('dataset/toolholder/kp.jason',kp_good_match_query)
+save_2_npy('dataset/toolholder/des.npy',des_good_match_query)
 if len(good)>MIN_MATH_COUNT:
     src_pts = np.float32([kp_good_match_query[i].pt for i in range(len(kp_good_match_query))]).reshape(-1,1,2)
     #src_pts = np.float32([kp_query_1[m.queryIdx].pt for m in good]).reshape(-1,1,2)
