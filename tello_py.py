@@ -8,71 +8,55 @@ Created on Thu Sep 24 22:11:47 2020
 
 import tello_controller
 import tello_video
-# import cv2 as cv
-# import marker_detecter
-import threading
+import multiprocessing
 import time
 import numpy as np
 import logging
+from pose_estimater import  pose_estimater
 
 
-'''def process_frame(_video, _marker_detecter):
+def process_frame(_video, _pose_estimater):
     global pose
     log = './log_pose/pose.log'
     logging.basicConfig(filename=log,
                         level=logging.DEBUG,
                         format='%(asctime)s %(message)s',
                         datefmt='%d/%m/%Y %H:%M:%S')
-
-    point_world = np.array([[0.223, 0.0, 0.0],
-                            [0.0, 0.0, 0.0],
-                            [0.0, 0.223, 0.0],
-                            [0.223, 0.223, 0.0]])
     while True:
-        frame = _video.get_frame()
-        if frame is None:
-            pass
-        else:
-            # print("get a frame in the marker thread.")
-            # _marker_detecter.drawdetectedmarker(frame)
-            _marker_detecter.marker_detect(frame)
-            if _marker_detecter.markerIds is not None:
-                pose = _marker_detecter.estimate_pose(point_world)
+        _frame = _video.get_frame()
+        if _frame is not None:
+            pose = _pose_estimater.estimate_pose(_frame)
+            if pose is not None:
                 print("Pose in the world is {}\n".format(pose))
                 logging.info("\nPose in the world is {}\n".format(pose))
-        time.sleep(0.075)'''
-
-'''def go_rectangle(pose):
-    path = np.array([[0, 0, 1.5],
-                     [1, 0, 1.5],
-                     [1, 0, 2.5],
-                     [0, 0, 2.5]])
-    controller.command()'''
-
+        time.sleep(0.075)
 
 controller = tello_controller.Tell_Controller()
 # marker_detecter = marker_detecter.Marker_Manager()
+pose_estimater = pose_estimater.PoseEstimater()
+pose_estimater.loaddata('pose_estimater/dataset/')
 frame = None
 pose = np.array([])
-
 try:
     controller.scan(1)
     video = tello_video.Tello_Video(controller.tello_list)
+    pose_thread = multiprocessing.Process(target=process_frame, args=(video,pose_estimater,))
+    pose_thread.start()
     controller.command("battery_check 20")
     controller.command("correct_ip")
     for i in range(len(controller.sn_list)):
         controller.command(str(i + 1) + "=" + controller.sn_list[i])
     controller.command("*>streamon")
     controller.command("*>takeoff")
-    controller.command("*>up 100")
+    controller.command("*>up 20")
     controller.command("wait 5")
     controller.command("*>back 100")
     controller.command("wait 5")
-    controller.command("*>left 100")
+    '''controller.command("*>left 100")
     controller.command("wait 5")
     controller.command("*>forward 100")
     controller.command("wait 5")
-    controller.command("*>right 100")
+    controller.command("*>right 100")'''
     # start_time = time.time()
     # end_time = time.time()
     # controller.command("wait 20")
@@ -82,6 +66,7 @@ try:
     controller.save_log(controller.manager)
     controller.manager.close()
     video.close()
+    pose_thread.terminate()
 except KeyboardInterrupt:
     print ('[Quit_ALL]Multi_Tello_Task got exception. \
            Sending land to all drones...\n')

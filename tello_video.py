@@ -36,7 +36,7 @@ class Tello_Video:
             self.sock_video[tello.tello_ip].setsockopt(
                 socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock_video[tello.tello_ip].bind(
-                (self.local_ip, self.local_video_port[tello.tello_ip]))
+                (self.local_ip, 11111)) # self.local_video_port[tello.tello_ip]))
         self.tello_ip_list = []
         self.video_cur_ip = ''
         self.res_string = ""

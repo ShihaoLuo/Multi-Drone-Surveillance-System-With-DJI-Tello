@@ -3,7 +3,7 @@ import socket
 import time
 import netifaces
 import netaddr
-# from netaddr import IPNetwork
+from netaddr import IPNetwork
 from collections import defaultdict
 from stats import Stats
 # import time
@@ -28,7 +28,7 @@ class Tello:
 class Tello_Manager:
     def __init__(self):
         self.local_ip = ''
-        self.local_port = 9001
+        self.local_port = 8889
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.local_ip, self.local_port))
@@ -48,62 +48,58 @@ class Tello_Manager:
         self.str_cmd_index = {}
         self.response = None
 
+    def get_host_ip(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+        finally:
+            s.close()
+        return ip
+
     def find_avaliable_tello(self, num):
         """
         Find avaliable tello in server's subnets
         :param num: Number of Tello this method is expected to find
         :return: None
         """
-        print ('[Start_Searching]Searching for %s available Tello...\n' % num)
-
-        # subnets, address = self.get_subnets()
+        print '[Start_Searching]Searching for %s available Tello...\n' % num
+        local_ip = self.get_host_ip()
+        #subnets, address = self.get_subnets()
         possible_addr = []
-        for i in range(10):
-            possible_addr.append("192.168.50." + str(i + 101))
 
-        '''for subnet, netmask in subnets:
-            for ip in IPNetwork('%s/%s' % (subnet, netmask)):
-                # skip local and broadcast
-                if str(ip).split('.')[3] == '0' or str(ip).split('.')[3] == \
-                    '255' or int(str(ip).split('.')[3]) < 100 or int(str(ip)\
-                        .split('.')[3]) > 103:
-                    continue
-                possible_addr.append(str(ip))
-                print(possible_addr)'''
-        
-        i = 0
+        #for subnet, netmask in subnets:
+         #   for ip in IPNetwork('%s/%s' % (subnet, netmask)):
+          #      # skip local and broadcast
+           #     if str(ip).split('.')[3] == '0' or str(ip).split('.')[3] == '255':
+            #        continue
+             #   possible_addr.append(str(ip))
+        for i in range(2, 100, 1):
+            possible_addr.append('192.168.50.'+str(i))
         while len(self.tello_ip_list) < num:
-            print ('[Still_Searching]Trying to find Tello in subnets...\n')
+            print '[Still_Searching]Trying to find Tello in subnets...\n'
 
-            ''''# delete already fond Tello
+            # delete already fond Tello
             for tello_ip in self.tello_ip_list:
                 if tello_ip in possible_addr:
                     possible_addr.remove(tello_ip)
             # skip server itself
             for ip in possible_addr:
-                if ip in address:
-                    continue'''
-            ip = possible_addr[i]
-            # record this command
-            if ip in self.tello_ip_list:
-                possible_addr.remove(ip)
-            self.log[ip].append(Stats('command', len(self.log[ip])))
-            self.socket.sendto(b'command', (ip, 9001))
-            print("Send command to %s" % ip)
-            time.sleep(0.1)
-            i += 1
-            if i > 9:
-                i = 0
-        '''with open('ip_list.txt','w') as f:
-            for ip in self.tello_ip_list:
-                f.write(ip)
-                f.write("\n")'''
+                #if ip in address:
+                 #   continue
+                # record this command
+                if ip == local_ip:
+                    continue
+                self.log[ip].append(Stats('command', len(self.log[ip])))
+                self.socket.sendto(b'command', (ip, 8889))
+                #print('send to {}'.format(ip))
+                time.sleep(0.1)
+
         # filter out non-tello addresses in log
         temp = defaultdict(list)
         for ip in self.tello_ip_list:
             temp[ip] = self.log[ip]
         self.log = temp
-        # print(self.log.items())
 
     def get_subnets(self):
         """
@@ -167,12 +163,12 @@ class Tello_Manager:
                 cmd_sof = [0x52, 0x65, str_cmd_index_h, str_cmd_index_l, 0x01, num + 1, 0x20]
                 cmd_sof_str = str(bytearray(cmd_sof))
                 cmd = cmd_sof_str + command[3:]
-                self.socket.sendto(cmd.encode('utf-8'), (ip, 9001))
+                self.socket.sendto(cmd.encode('utf-8'), (ip, 8889))
 
             print ('[Multi_Command]----Multi_Send----IP:%s----Command:   %s\n' % (ip, command[3:]))
             real_command = command[3:]
         else:
-            self.socket.sendto(command.encode('utf-8'), (ip, 9001))
+            self.socket.sendto(command.encode('utf-8'), (ip, 8889))
             print ('[Single_Command]----Single_Send----IP:%s----Command:   %s\n' % (ip, command))
             real_command = command
 

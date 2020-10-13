@@ -10,7 +10,10 @@ import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
 import json
+import multiprocessing
 #import set_world_point
+
+object_name = 'toolholder'
 
 def save_2_jason(_file, arr):
     data = {}
@@ -66,7 +69,7 @@ img_query = cv.imread('./dataset/toolholder/images/toolholder.jpg', 0)
                  contrastThreshold=0.05,
                  edgeThreshold=10,
                  sigma=1.3)'''
-cv.imwrite('./dataset/toolholder/images/toolholder.jpg',img_query)
+cv.imwrite('./dataset/'+object_name+'/images/'+object_name+'.jpg',img_query)
 surf_paras = dict(hessianThreshold=100,
                   nOctaves=10,
                   nOctaveLayers=2,
@@ -105,8 +108,8 @@ print('the num of finding featurs of query is {}\n'.format(len(des_query)))
 print('the num of finding featurs of test is {}\n'.format(len(des_test)))
 print('the num of finding matches is {}\n'.format(len(matches)))
 print("the len of good match is {}\n".format(len(good)))
-save_2_jason('dataset/toolholder/kp.jason',kp_good_match_query)
-save_2_npy('dataset/toolholder/des.npy',des_good_match_query)
+save_2_jason('dataset/'+object_name+'/kp.json',kp_good_match_query)
+save_2_npy('dataset/'+object_name+'/des.npy',des_good_match_query)
 if len(good)>MIN_MATH_COUNT:
     src_pts = np.float32([kp_good_match_query[i].pt for i in range(len(kp_good_match_query))]).reshape(-1,1,2)
     #src_pts = np.float32([kp_query_1[m.queryIdx].pt for m in good]).reshape(-1,1,2)
@@ -129,16 +132,35 @@ draw_params = dict(matchColor = (0,255,0),
                    matchesMask = matchesMask,
                    flags = 2)
 img = cv.drawMatches(img_query,kp_query,img_test,kp_test,good,None,**draw_params)
-fig = plt.figure(figsize=(22, 10))
-plt.subplot(1, 1, 1).axis("off")
-plt.imshow(img)
-plt.show()
 
+def show_pic(_img):
+    fig = plt.figure(figsize=(12, 10))
+    plt.subplot(1, 1, 1).axis("off")
+    plt.imshow(_img)
+    plt.show()
+
+thread = multiprocessing.Process(target=show_pic, args=(img,))
+thread.start()
+wpixel = np.array([])
+wpoint = np.array([])
+for i in range(4):
+    wpxlx = input('input the x of No.{} wpixel:'.format(i+1))
+    wpxly = input('input the y of No.{} wpixel:'.format(i+1))
+    wptx = input('input the x of No.{} wpoint:'.format(i+1))
+    wpty = input('input the y of No.{} wpoint:'.format(i+1))
+    wptz = input('input the z of No.{} wpoint:'.format(i + 1))
+    wpxl = np.array([wpxlx, wpxly])
+    wpt = np.array([wptx, wpty, wptz])
+    wpixel =np.append(wpixel, wpxl)
+    wpoint = np.append(wpoint, wpt)
+save_2_npy('dataset/'+object_name+'/wpixel.npy', wpixel)
+save_2_npy('dataset/'+object_name+'/wpoint.npy', wpoint)
+print(wpixel)
+print(wpoint)
 
 '''
 img_gkp = cv.drawKeypoints(img_query, kp_good_match_query, None)
 plt.imshow(img_gkp)
-
 wps = [[None, None, None]]*len(kp_good_match_query)
 # pixelpts = [[541.0, 318.5], [625.0, 268.5], [445.0, 301.0], [433.0, 315.6], [413.0, 338.0], [450.0, 440.0], [479.0, 335.5], [482.0, 314.0], [486.0, 305.0]]
 # worldpts = [[-35.0,81.0, 22.0], [-73.0, 60.0, 21.0], [9.0, 67.0, 41.4], [14.2, 76.9, 41.4], [23.0, 86.5,41.4],[-5.0, 88.0, 41.4],[-12.5, 85.5, 41.4],[-14.0, 77.0, 41.4],[-15.5, 72.0, 41.4]]
@@ -155,4 +177,5 @@ plt.subplot(1, 2, 2)
 plt.subplot(1, 2, 2).axis("off")
 plt.imshow(img2)
 plt.show()
+222.9 , 115.6 ,  77.95, 117.  ,  78.6 , 257.2 , 218.8 , 255.8 
 '''
