@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import multiprocessing
 
 class PoseEstimater():
-    def __init__(self, _algorithm, min_match):
+    def __init__(self, _algorithm='SIFT', min_match=30):
         self.camera_matrix = None
         self.distor_matrix = None
         self.min_match = min_match
@@ -112,7 +112,7 @@ class PoseEstimater():
             '''print('the num of finding featurs of query is {}\n'.format(len(des_query)))
             print('the num of finding featurs of test is {}\n'.format(len(des_test)))
             print('the num of finding matches is {}\n'.format(len(matches)))'''
-            print("good mathch: {}".format(len(good)))
+            #print("good mathch: {}".format(len(good)))
             if len(good) > self.min_match:
                 src_pts = np.float32([kp_good_match_query[i].pt for i in range(len(kp_good_match_query))]).reshape(-1, 1, 2)
                 dst_pts = np.float32([kp_test[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)

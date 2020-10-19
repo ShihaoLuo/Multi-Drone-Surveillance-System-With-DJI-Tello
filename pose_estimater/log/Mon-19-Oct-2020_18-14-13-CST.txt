@@ -1,0 +1,410 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: ok
+start time: 2020-10-19 18:14:13.445693
+end_time: 2020-10-19 18:14:13.489633
+duration: 0.04394
+
+id: 1
+command: battery?
+response: 92
+
+start time: 2020-10-19 18:14:15.448723
+end_time: 2020-10-19 18:14:15.473766
+duration: 0.025043
+
+id: 2
+command: sn?
+response: 0TQDG43EDB8142
+start time: 2020-10-19 18:14:17.951695
+end_time: 2020-10-19 18:14:17.974701
+duration: 0.023006
+
+id: 3
+command: setfps high
+response: ok
+start time: 2020-10-19 18:14:21.462002
+end_time: 2020-10-19 18:14:21.491743
+duration: 0.029741
+
+id: 4
+command: setresolution low
+response: ok
+start time: 2020-10-19 18:14:22.963946
+end_time: 2020-10-19 18:14:22.970832
+duration: 0.006886
+
+id: 5
+command: setbitrate 5
+response: ok
+start time: 2020-10-19 18:14:23.965345
+end_time: 2020-10-19 18:14:24.012869
+duration: 0.047524
+
+id: 6
+command: streamon
+response: ok
+start time: 2020-10-19 18:14:25.467605
+end_time: 2020-10-19 18:14:25.521298
+duration: 0.053693
+
+id: 7
+command: takeoff
+response: ok
+start time: 2020-10-19 18:14:26.482837
+end_time: 2020-10-19 18:14:35.081748
+duration: 8.598911
+
+id: 8
+command: up 150
+response: ok
+start time: 2020-10-19 18:14:35.518717
+end_time: 2020-10-19 18:14:38.551536
+duration: 3.032819
+
+id: 9
+command: forward 100
+response: ok
+start time: 2020-10-19 18:14:39.030908
+end_time: 2020-10-19 18:14:41.992433
+duration: 2.961525
+
+id: 10
+command: command
+response: ok
+start time: 2020-10-19 18:14:42.039886
+end_time: 2020-10-19 18:14:42.117923
+duration: 0.078037
+
+id: 11
+command: right 100
+response: ok
+start time: 2020-10-19 18:14:44.042621
+end_time: 2020-10-19 18:14:46.999692
+duration: 2.957071
+
+id: 12
+command: command
+response: ok
+start time: 2020-10-19 18:14:47.051628
+end_time: 2020-10-19 18:14:47.096584
+duration: 0.044956
+
+id: 13
+command: left 100
+response: ok
+start time: 2020-10-19 18:14:49.054453
+end_time: 2020-10-19 18:14:51.516806
+duration: 2.462353
+
+id: 14
+command: command
+response: ok
+start time: 2020-10-19 18:14:51.561912
+end_time: 2020-10-19 18:14:51.615501
+duration: 0.053589
+
+id: 15
+command: back 100
+response: ok
+start time: 2020-10-19 18:14:53.564291
+end_time: 2020-10-19 18:14:56.239770
+duration: 2.675479
+
+id: 16
+command: command
+response: ok
+start time: 2020-10-19 18:14:56.572614
+end_time: 2020-10-19 18:14:56.597262
+duration: 0.024648
+
+id: 17
+command: right 100
+response: ok
+start time: 2020-10-19 18:14:58.575269
+end_time: 2020-10-19 18:15:01.146472
+duration: 2.571203
+
+id: 18
+command: command
+response: ok
+start time: 2020-10-19 18:15:01.583059
+end_time: 2020-10-19 18:15:01.626683
+duration: 0.043624
+
+id: 19
+command: left 100
+response: ok
+start time: 2020-10-19 18:15:03.585529
+end_time: 2020-10-19 18:15:06.408615
+duration: 2.823086
+
+id: 20
+command: command
+response: ok
+start time: 2020-10-19 18:15:06.593007
+end_time: 2020-10-19 18:15:06.622450
+duration: 0.029443
+
+id: 21
+command: forward 100
+response: ok
+start time: 2020-10-19 18:15:08.595547
+end_time: 2020-10-19 18:15:11.103371
+duration: 2.507824
+
+id: 22
+command: command
+response: ok
+start time: 2020-10-19 18:15:11.605610
+end_time: 2020-10-19 18:15:11.615289
+duration: 0.009679
+
+id: 23
+command: right 100
+response: ok
+start time: 2020-10-19 18:15:13.608090
+end_time: 2020-10-19 18:15:16.156265
+duration: 2.548175
+
+id: 24
+command: command
+response: ok
+start time: 2020-10-19 18:15:16.616626
+end_time: 2020-10-19 18:15:16.664677
+duration: 0.048051
+
+id: 25
+command: left 100
+response: ok
+start time: 2020-10-19 18:15:18.619047
+end_time: 2020-10-19 18:15:21.411007
+duration: 2.79196
+
+id: 26
+command: command
+response: ok
+start time: 2020-10-19 18:15:21.642242
+end_time: 2020-10-19 18:15:21.663415
+duration: 0.021173
+
+id: 27
+command: back 100
+response: ok
+start time: 2020-10-19 18:15:23.644133
+end_time: 2020-10-19 18:15:26.262153
+duration: 2.61802
+
+id: 28
+command: command
+response: ok
+start time: 2020-10-19 18:15:26.716163
+end_time: 2020-10-19 18:15:26.771183
+duration: 0.05502
+
+id: 29
+command: right 100
+response: ok
+start time: 2020-10-19 18:15:28.718812
+end_time: 2020-10-19 18:15:31.309898
+duration: 2.591086
+
+id: 30
+command: command
+response: ok
+start time: 2020-10-19 18:15:31.735369
+end_time: 2020-10-19 18:15:31.767390
+duration: 0.032021
+
+id: 31
+command: left 100
+response: ok
+start time: 2020-10-19 18:15:33.738003
+end_time: 2020-10-19 18:15:36.322391
+duration: 2.584388
+
+id: 32
+command: command
+response: ok
+start time: 2020-10-19 18:15:36.773591
+end_time: 2020-10-19 18:15:36.821788
+duration: 0.048197
+
+id: 33
+command: forward 100
+response: ok
+start time: 2020-10-19 18:15:38.776098
+end_time: 2020-10-19 18:15:41.470360
+duration: 2.694262
+
+id: 34
+command: command
+response: ok
+start time: 2020-10-19 18:15:41.783523
+end_time: 2020-10-19 18:15:41.818846
+duration: 0.035323
+
+id: 35
+command: right 100
+response: ok
+start time: 2020-10-19 18:15:43.786050
+end_time: 2020-10-19 18:15:46.420314
+duration: 2.634264
+
+id: 36
+command: command
+response: ok
+start time: 2020-10-19 18:15:46.793835
+end_time: 2020-10-19 18:15:46.832969
+duration: 0.039134
+
+id: 37
+command: left 100
+response: ok
+start time: 2020-10-19 18:15:48.796382
+end_time: 2020-10-19 18:15:51.302383
+duration: 2.506001
+
+id: 38
+command: command
+response: ok
+start time: 2020-10-19 18:15:51.803805
+end_time: 2020-10-19 18:15:51.848891
+duration: 0.045086
+
+id: 39
+command: back 100
+response: ok
+start time: 2020-10-19 18:15:53.806465
+end_time: 2020-10-19 18:15:56.391796
+duration: 2.585331
+
+id: 40
+command: command
+response: ok
+start time: 2020-10-19 18:15:56.816281
+end_time: 2020-10-19 18:15:56.848951
+duration: 0.03267
+
+id: 41
+command: right 100
+response: ok
+start time: 2020-10-19 18:15:58.819592
+end_time: 2020-10-19 18:16:01.389577
+duration: 2.569985
+
+id: 42
+command: command
+response: ok
+start time: 2020-10-19 18:16:01.833713
+end_time: 2020-10-19 18:16:01.848493
+duration: 0.01478
+
+id: 43
+command: left 100
+response: ok
+start time: 2020-10-19 18:16:03.836169
+end_time: 2020-10-19 18:16:06.307591
+duration: 2.471422
+
+id: 44
+command: command
+response: ok
+start time: 2020-10-19 18:16:06.343837
+end_time: 2020-10-19 18:16:06.357209
+duration: 0.013372
+
+id: 45
+command: forward 100
+response: ok
+start time: 2020-10-19 18:16:08.346595
+end_time: 2020-10-19 18:16:11.307265
+duration: 2.96067
+
+id: 46
+command: command
+response: ok
+start time: 2020-10-19 18:16:11.357360
+end_time: 2020-10-19 18:16:11.407370
+duration: 0.05001
+
+id: 47
+command: right 100
+response: ok
+start time: 2020-10-19 18:16:13.359297
+end_time: 2020-10-19 18:16:15.868533
+duration: 2.509236
+
+id: 48
+command: command
+response: ok
+start time: 2020-10-19 18:16:16.367693
+end_time: 2020-10-19 18:16:16.374451
+duration: 0.006758
+
+id: 49
+command: left 100
+response: ok
+start time: 2020-10-19 18:16:18.370819
+end_time: 2020-10-19 18:16:20.986380
+duration: 2.615561
+
+id: 50
+command: command
+response: ok
+start time: 2020-10-19 18:16:21.384558
+end_time: 2020-10-19 18:16:21.424662
+duration: 0.040104
+
+id: 51
+command: back 100
+response: ok
+start time: 2020-10-19 18:16:23.387638
+end_time: 2020-10-19 18:16:26.070560
+duration: 2.682922
+
+id: 52
+command: command
+response: ok
+start time: 2020-10-19 18:16:26.398138
+end_time: 2020-10-19 18:16:26.425276
+duration: 0.027138
+
+id: 53
+command: right 100
+response: ok
+start time: 2020-10-19 18:16:28.400836
+end_time: 2020-10-19 18:16:30.966420
+duration: 2.565584
+
+id: 54
+command: command
+response: ok
+start time: 2020-10-19 18:16:31.415073
+end_time: 2020-10-19 18:16:31.424061
+duration: 0.008988
+
+id: 55
+command: left 100
+response: ok
+start time: 2020-10-19 18:16:33.418334
+end_time: 2020-10-19 18:16:35.996713
+duration: 2.578379
+
+id: 56
+command: command
+response: ok
+start time: 2020-10-19 18:16:36.425937
+end_time: 2020-10-19 18:16:36.475415
+duration: 0.049478
+
+id: 57
+command: land
+response: ok
+start time: 2020-10-19 18:16:38.429113
+end_time: 2020-10-19 18:16:42.212859
+duration: 3.783746
+

@@ -13,7 +13,7 @@ import json
 import multiprocessing
 #import set_world_point
 
-object_name = 'whiteboard'
+object_name = 'post'
 
 def save_2_jason(_file, arr):
     data = {}
@@ -54,7 +54,6 @@ def get_ROI(_img):
     roi = cv.selectROI('roi', _img, True, False)
     cv.destroyAllWindows()
     x, y, w, h = roi
-    cv.rectangle(_img, (x, y), (x + w, y + h), (0, 0, 255), 2)
     dst = _img[y:y + h, x:x + w]
     return dst
 
@@ -62,8 +61,8 @@ def get_ROI(_img):
 MIN_MATH_COUNT = 20
 kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
 
-img_test = cv.imread('./dataset/'+object_name+'/images/'+object_name+'31.jpg', 0)
-img_query = cv.imread('./dataset/'+object_name+'/images/'+object_name+'22.jpg', 0)
+img_test = cv.imread('./dataset/'+object_name+'/images/'+object_name+'24.jpg')
+img_query = cv.imread('./dataset/'+object_name+'/images/'+object_name+'7.jpg')
 #img_test = cv.filter2D(img_test, -1, kernel)
 #img_query = cv.filter2D(img_query, -1, kernel)
 img_query = get_ROI(img_query)
@@ -126,7 +125,7 @@ if len(good)>=MIN_MATH_COUNT:
 
     M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
     matchesMask = mask.ravel().tolist()
-    h,w = img_query.shape
+    h,w = img_query.shape[0:2]
     d = 1
     pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
     dst = cv.perspectiveTransform(pts,M)
@@ -141,13 +140,16 @@ draw_params = dict(matchColor = (0,255,0),
                    flags = 2)
 img = cv.drawMatches(img_query,kp_query,img_test,kp_test,good,None,**draw_params)
 
-def show_pic(_img):
-    fig = plt.figure(figsize=(12, 10))
-    plt.subplot(1, 1, 1).axis("off")
+def show_pic(_img, _img_query):
+    #fig = plt.figure(figsize=(12, 10))
+    #plt.subplot(1, 1, 1).axis("off")
     plt.imshow(_img)
     plt.show()
+    #plt.subplot(1, 1, 1).axis("off")
+    plt.imshow(_img_query)
+    plt.show()
 
-thread = multiprocessing.Process(target=show_pic, args=(img,))
+thread = multiprocessing.Process(target=show_pic, args=(img, img_query,))
 thread.start()
 wpixel = np.array([])
 wpoint = np.array([])

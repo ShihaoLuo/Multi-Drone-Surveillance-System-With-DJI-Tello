@@ -16,7 +16,8 @@ import cv2 as cv
 
 def process_frame(_video, _pose_estimater):
     global pose
-    img_query = cv.imread('pose_estimater/dataset/toolholder/images/toolholder.jpg', 0)
+    #img_query = cv.imread('pose_estimater/dataset/post/images/post.jpg', 0)
+    img_query = cv.imread('pose_estimater/dataset/post/images/post.jpg', 0)
     log = './log_pose/pose.log'
     logging.basicConfig(filename=log,
                         level=logging.DEBUG,
@@ -31,11 +32,13 @@ def process_frame(_video, _pose_estimater):
                 logging.info("\n{}".format(pose))
 
 controller = tello_controller.Tell_Controller()
-pose_estimater = pose_estimater.PoseEstimater('SIFT', 10)
+pose_estimater = pose_estimater.PoseEstimater('SIFT', 15)
 pose_estimater.show_match_start()
 pose_estimater.loaddata('pose_estimater/dataset/')
 frame = None
 pose = np.array([])
+move_command = ['forward 100', 'right 100', 'left 100', 'back 100', 'right 100', 'left 100']
+
 try:
     controller.scan(1)
     video = tello_video.Tello_Video(controller.tello_list)
@@ -50,7 +53,11 @@ try:
     controller.command('setbitrate 5')
     controller.command("*>streamon")
     controller.command("*>takeoff")
-    controller.command('*>up 30')
+    controller.command('*>up 170')
+    controller.command('wait 5')
+    for i in range(12):
+        controller.command('*>'+move_command[i%6])
+        controller.command('wait 5')
     controller.command("wait 20")
     '''controller.command("*>takeoff")
     controller.command("*>up 20")
