@@ -1,0 +1,122 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: b'ok'
+start time: 2020-10-28 15:26:54.363861
+end_time: 2020-10-28 15:26:54.442647
+duration: 0.078786
+
+id: 1
+command: battery?
+response: b'92\r\n'
+start time: 2020-10-28 15:26:56.371946
+end_time: 2020-10-28 15:26:56.427866
+duration: 0.05592
+
+id: 2
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-10-28 15:26:58.930728
+end_time: 2020-10-28 15:26:58.982309
+duration: 0.051581
+
+id: 3
+command: setfps high
+response: b'ok'
+start time: 2020-10-28 15:27:02.303739
+end_time: 2020-10-28 15:27:02.341335
+duration: 0.037596
+
+id: 4
+command: setresolution high
+response: b'ok'
+start time: 2020-10-28 15:27:03.851478
+end_time: 2020-10-28 15:27:03.876359
+duration: 0.024881
+
+id: 5
+command: setbitrate 5
+response: b'ok'
+start time: 2020-10-28 15:27:04.893532
+end_time: 2020-10-28 15:27:04.946468
+duration: 0.052936
+
+id: 6
+command: streamon
+response: b'ok'
+start time: 2020-10-28 15:27:05.935552
+end_time: 2020-10-28 15:27:05.968643
+duration: 0.033091
+
+id: 7
+command: takeoff
+response: b'ok'
+start time: 2020-10-28 15:27:06.957446
+end_time: 2020-10-28 15:27:13.882599
+duration: 6.925153
+
+id: 8
+command: up 170
+response: b'ok'
+start time: 2020-10-28 15:27:14.066759
+end_time: 2020-10-28 15:27:17.264343
+duration: 3.197584
+
+id: 9
+command: command
+response: b'ok'
+start time: 2020-10-28 15:27:17.631594
+end_time: 2020-10-28 15:27:17.702094
+duration: 0.0705
+
+id: 10
+command: command
+response: b'ok'
+start time: 2020-10-28 15:27:21.728184
+end_time: 2020-10-28 15:27:21.781402
+duration: 0.053218
+
+id: 11
+command: command
+response: b'ok'
+start time: 2020-10-28 15:27:23.805290
+end_time: 2020-10-28 15:27:23.863475
+duration: 0.058185
+
+id: 12
+command: command
+response: b'ok'
+start time: 2020-10-28 15:27:25.883021
+end_time: 2020-10-28 15:27:25.919206
+duration: 0.036185
+
+id: 13
+command: command
+response: b'ok'
+start time: 2020-10-28 15:27:27.956110
+end_time: 2020-10-28 15:27:27.996284
+duration: 0.040174
+
+id: 14
+command: command
+response: b'ok'
+start time: 2020-10-28 15:27:30.026717
+end_time: 2020-10-28 15:27:30.048660
+duration: 0.021943
+
+id: 15
+command: command
+response: b'ok'
+start time: 2020-10-28 15:27:32.077451
+end_time: 2020-10-28 15:27:32.129363
+duration: 0.051912
+
+id: 16
+command: land
+response: b'ok'
+start time: 2020-10-28 15:27:34.115517
+end_time: 2020-10-28 15:27:39.889261
+duration: 5.773744
+

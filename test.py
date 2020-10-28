@@ -1,4 +1,4 @@
-from demon.pose_estimater import Demon
+from pose_estimater.pose_estimater import Demon
 import cv2 as cv
 import time
 

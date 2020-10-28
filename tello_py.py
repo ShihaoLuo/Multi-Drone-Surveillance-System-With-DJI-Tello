@@ -11,27 +11,25 @@ import tello_video
 import multiprocessing
 import numpy as np
 #import logging
-from pose_estimater import  pose_estimater
+from pose_estimater import  pic_match
 import cv2 as cv
 
-def process_frame(_video, _pose_estimater):
+def process_frame(_video, _PicMatch):
     global pose
     #img_query = cv.imread('pose_estimater/dataset/post/images/post.jpg', 0)
-    img_query = cv.imread('pose_estimater/dataset/post/images/post.jpg', 0)
+    #img_query = cv.imread('pose_estimater/dataset/post/images/post.jpg', 0)
     #log = './log_pose/pose.log'
     #logging.basicConfig(filename=log, level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
     while True:
         _frame = _video.get_frame()
         if _frame is not None:
-            pose = _pose_estimater.estimate_pose(img_query, _frame)
-            if pose is not None:
-                print("Pose in the world is {}".format(pose))
-                #logging.info("\n{}".format(pose))
+            obj, ratio = _PicMatch.pic_match(_frame)
+            if ratio > 0.2:
+                img_ref = cv.imread('./pose_estimater/dataset/' + obj + '/images/' + obj + '.jpg')
 
 controller = tello_controller.Tell_Controller()
-pose_estimater = pose_estimater.PoseEstimater('SIFT', 15)
-pose_estimater.show_match_start()
-pose_estimater.loaddata('pose_estimater/dataset/')
+PicMatch = pic_match.PicMatch()
+PicMatch.loaddata('./pose_estimater/dataset/')
 frame = None
 pose = np.array([])
 move_command = ['forward 100', 'left 100', 'right 100', 'back 100', 'left 100', 'right 100']

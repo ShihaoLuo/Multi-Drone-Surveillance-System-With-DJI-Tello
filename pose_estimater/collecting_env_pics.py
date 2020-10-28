@@ -17,27 +17,33 @@ controller.command("battery_check 20")
 controller.command("correct_ip")
 video = tello_video.Tello_Video(controller.tello_list)
 
-name = 'post'
+name = 'test'
 num = 6
 
-pic_folder = './dataset/'+name
-if not os.path.exists(pic_folder):
-    os.mkdir(pic_folder)
-pic_folder = './dataset/'+name+'/images/'
-if not os.path.exists(pic_folder):
-    os.mkdir(pic_folder)
+if name == 'test':
+    pic_folder = './' + name+'/images/'
+    if not os.path.exists(pic_folder):
+        os.mkdir(pic_folder)
+else:
+    pic_folder = './dataset/'+name
+    if not os.path.exists(pic_folder):
+        os.mkdir(pic_folder)
+    pic_folder = './dataset/'+name+'/images/'
+    if not os.path.exists(pic_folder):
+        os.mkdir(pic_folder)
 
 
 init_command = ['setfps high', 'setresolution high', 'setbitrate 5', 'streamon', 'takeoff', 'up 170']
-move_command = ['forward 60', 'right 100', 'left 100', 'back 60', 'right 100', 'left 100']
+move_command = ['ccw 60', 'foward 100', 'ccw 60', 'ccw 60', 'forward 100', 'ccw 100']
 
 try:
     for i in range(len(controller.sn_list)):
         controller.command(str(i + 1) + "=" + controller.sn_list[i])
     for init_c in init_command:
         controller.command('*>'+init_c)
+    controller.command('wait 3')
     for i in range(num):
-        controller.command('*>'+move_command[i%6])
+        #controller.command('*>'+move_command[i%6])
         video.take_pic(pic_folder + name + str(i) + '.jpg')
         controller.command('wait 1')
     controller.command('*>land')
