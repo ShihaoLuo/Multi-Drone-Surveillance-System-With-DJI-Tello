@@ -1,0 +1,87 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: b'ok'
+start time: 2020-10-29 16:27:06.434722
+end_time: 2020-10-29 16:27:06.538432
+duration: 0.10371
+
+id: 1
+command: battery?
+response: b'100\r\n'
+start time: 2020-10-29 16:27:08.443420
+end_time: 2020-10-29 16:27:08.462457
+duration: 0.019037
+
+id: 2
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-10-29 16:27:10.997138
+end_time: 2020-10-29 16:27:11.023799
+duration: 0.026661
+
+id: 3
+command: setfps high
+response: b'ok'
+start time: 2020-10-29 16:27:14.753792
+end_time: 2020-10-29 16:27:14.791483
+duration: 0.037691
+
+id: 4
+command: setresolution high
+response: b'ok'
+start time: 2020-10-29 16:27:16.301752
+end_time: 2020-10-29 16:27:16.327230
+duration: 0.025478
+
+id: 5
+command: setbitrate 5
+response: b'ok'
+start time: 2020-10-29 16:27:17.850024
+end_time: 2020-10-29 16:27:17.907419
+duration: 0.057395
+
+id: 6
+command: streamon
+response: b'ok'
+start time: 2020-10-29 16:27:18.891373
+end_time: 2020-10-29 16:27:18.928118
+duration: 0.036745
+
+id: 7
+command: takeoff
+response: b'error, high temp'
+start time: 2020-10-29 16:27:20.439527
+end_time: 2020-10-29 16:27:20.458071
+duration: 0.018544
+
+id: 8
+command: up 170
+response: b'error Motor stop'
+start time: 2020-10-29 16:27:21.987456
+end_time: 2020-10-29 16:27:22.052126
+duration: 0.06467
+
+id: 9
+command: command
+response: b'ok'
+start time: 2020-10-29 16:27:23.029646
+end_time: 2020-10-29 16:27:23.068086
+duration: 0.03844
+
+id: 10
+command: command
+response: b'ok'
+start time: 2020-10-29 16:27:27.093500
+end_time: 2020-10-29 16:27:27.113585
+duration: 0.020085
+
+id: 11
+command: command
+response: None
+start time: 2020-10-29 16:27:29.170434
+end_time: None
+duration: None
+

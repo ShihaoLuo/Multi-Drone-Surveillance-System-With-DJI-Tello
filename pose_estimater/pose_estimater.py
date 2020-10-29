@@ -50,7 +50,7 @@ class Demon():
             self.camera_M, self.distor_M, size, 1, size
         )
         img1 = cv.undistort(img1, self.camera_M, self.distor_M, None, scaled_camera_matrix)
-        img1 = cv.warpPerspective(img1, M, size)
+        #img1 = cv.warpPerspective(img1, M, size)
         img1 = Image.fromarray(img1)
         return img1
 
