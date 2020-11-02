@@ -168,37 +168,33 @@ class PoseEstimater():
             #print(RR)
             #print(inliers)
             #print('tvec/n{}'.format(tvec/2))
-            R = np.zeros((3, 3), dtype=np.float64)
-            cv.Rodrigues(rvec, R)
-            sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
-            singular = sy < 1e-6
-            if not singular:
-                x = math.atan2(R[2, 1], R[2, 2])*180.0/3.1415926
-                y = math.atan2(-R[2, 0], sy)*180.0/3.1415926
-                z = math.atan2(R[1, 0], R[0, 0])*180.0/3.1415926
-            else:
-                x = math.atan2(-R[1, 2], R[1, 1])
-                y = math.atan2(-R[2, 0], sy)
-                z = 0
-            #print('dst:', R)
-            #print('x: {}\ny: {}\nz: {}'.format(x, y, z))
-            #print('rvec:{}\n'.format(rvec))
-            #print('tvec:{}\n'.format(tvec))
-            rotM = np.array(cv.Rodrigues(rvec)[0])
-            #print('rotM {}\n)'.format(rotM))
-            #print(-np.linalg.inv(rotM))
-            pose = np.dot(np.linalg.inv(-rotM), tvec)
-            R = np.zeros((3, 3), dtype=np.float64)
-            R[0, 1]=-1
-            R[1, 0]=1
-            R[2,2]=1
             if RR is True and len(inliers)>=6:
+                R = np.zeros((3, 3), dtype=np.float64)
+                cv.Rodrigues(rvec, R)
+                sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
+                singular = sy < 1e-6
+                if not singular:
+                    x = math.atan2(R[2, 1], R[2, 2]) * 180.0 / 3.1415926
+                    y = math.atan2(-R[2, 0], sy) * 180.0 / 3.1415926
+                    z = math.atan2(R[1, 0], R[0, 0]) * 180.0 / 3.1415926
+                else:
+                    x = math.atan2(-R[1, 2], R[1, 1])
+                    y = math.atan2(-R[2, 0], sy)
+                    z = 0
+                # print('dst:', R)
+                # print('x: {}\ny: {}\nz: {}'.format(x, y, z))
+                # print('rvec:{}\n'.format(rvec))
+                # print('tvec:{}\n'.format(tvec))
+                rotM = np.array(cv.Rodrigues(rvec)[0])
+                # print('rotM {}\n)'.format(rotM))
+                # print(-np.linalg.inv(rotM))
+                pose = np.dot(np.linalg.inv(-rotM), tvec)
                 #print(inliers)
-                return pose
+                return pose, y
             else:
-                return None
+                return None, None
         else:
-            return None
+            return None, None
 
     def show_match_start(self):
         self.showmatchflag = 1
