@@ -1,0 +1,101 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: b'ok'
+start time: 2020-11-11 16:24:04.288140
+end_time: 2020-11-11 16:24:04.346697
+duration: 0.058557
+
+id: 1
+command: battery?
+response: b'76\r\n'
+start time: 2020-11-11 16:24:06.304832
+end_time: 2020-11-11 16:24:06.363066
+duration: 0.058234
+
+id: 2
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-11-11 16:24:08.873903
+end_time: 2020-11-11 16:24:08.935827
+duration: 0.061924
+
+id: 3
+command: speed 100
+response: b'ok'
+start time: 2020-11-11 16:24:12.515543
+end_time: 2020-11-11 16:24:12.555316
+duration: 0.039773
+
+id: 4
+command: setfps high
+response: b'ok'
+start time: 2020-11-11 16:24:13.552345
+end_time: 2020-11-11 16:24:13.575831
+duration: 0.023486
+
+id: 5
+command: setresolution high
+response: b'ok'
+start time: 2020-11-11 16:24:14.584116
+end_time: 2020-11-11 16:24:14.646115
+duration: 0.061999
+
+id: 6
+command: takeoff
+response: b'ok'
+start time: 2020-11-11 16:24:16.652630
+end_time: 2020-11-11 16:24:22.773776
+duration: 6.121146
+
+id: 7
+command: up 170
+response: b'ok'
+start time: 2020-11-11 16:24:22.804533
+end_time: 2020-11-11 16:24:26.114458
+duration: 3.309925
+
+id: 8
+command: streamon
+response: b'ok'
+start time: 2020-11-11 16:24:26.145193
+end_time: 2020-11-11 16:24:26.170575
+duration: 0.025382
+
+id: 9
+command: command
+response: b'ok'
+start time: 2020-11-11 16:24:31.721164
+end_time: 2020-11-11 16:24:31.785801
+duration: 0.064637
+
+id: 10
+command: ccw 15
+response: b'ok'
+start time: 2020-11-11 16:24:37.200724
+end_time: 2020-11-11 16:24:38.112242
+duration: 0.911518
+
+id: 11
+command: cw 15
+response: b'ok'
+start time: 2020-11-11 16:24:39.512838
+end_time: 2020-11-11 16:24:40.406627
+duration: 0.893789
+
+id: 12
+command: streamoff
+response: b'ok'
+start time: 2020-11-11 16:24:41.812613
+end_time: 2020-11-11 16:24:41.839700
+duration: 0.027087
+
+id: 13
+command: land
+response: b'ok'
+start time: 2020-11-11 16:24:42.866187
+end_time: 2020-11-11 16:24:48.367749
+duration: 5.501562
+

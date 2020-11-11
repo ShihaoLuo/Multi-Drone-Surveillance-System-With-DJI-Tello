@@ -1,0 +1,129 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2020-11-11 17:10:29.052957
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: b'ok'
+start time: 2020-11-11 17:10:31.056556
+end_time: 2020-11-11 17:10:31.065455
+duration: 0.008899
+
+id: 2
+command: battery?
+response: b'94\r\n'
+start time: 2020-11-11 17:10:33.073218
+end_time: 2020-11-11 17:10:33.109771
+duration: 0.036553
+
+id: 3
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-11-11 17:10:35.631508
+end_time: 2020-11-11 17:10:35.668145
+duration: 0.036637
+
+id: 4
+command: speed 100
+response: b'ok'
+start time: 2020-11-11 17:10:38.762544
+end_time: 2020-11-11 17:10:38.833404
+duration: 0.07086
+
+id: 5
+command: setfps high
+response: b'ok'
+start time: 2020-11-11 17:10:39.804355
+end_time: 2020-11-11 17:10:39.849917
+duration: 0.045562
+
+id: 6
+command: setresolution high
+response: b'ok'
+start time: 2020-11-11 17:10:40.851227
+end_time: 2020-11-11 17:10:40.864758
+duration: 0.013531
+
+id: 7
+command: takeoff
+response: b'ok'
+start time: 2020-11-11 17:10:42.933326
+end_time: 2020-11-11 17:10:50.351329
+duration: 7.418003
+
+id: 8
+command: up 170
+response: b'ok'
+start time: 2020-11-11 17:10:50.382137
+end_time: 2020-11-11 17:10:53.462193
+duration: 3.080056
+
+id: 9
+command: streamon
+response: b'ok'
+start time: 2020-11-11 17:10:53.503190
+end_time: 2020-11-11 17:10:53.569270
+duration: 0.06608
+
+id: 10
+command: command
+response: b'ok'
+start time: 2020-11-11 17:10:59.128065
+end_time: 2020-11-11 17:10:59.180074
+duration: 0.052009
+
+id: 11
+command: ccw 15
+response: b'ok'
+start time: 2020-11-11 17:11:02.507818
+end_time: 2020-11-11 17:11:03.414587
+duration: 0.906769
+
+id: 12
+command: cw 15
+response: b'ok'
+start time: 2020-11-11 17:11:06.403726
+end_time: 2020-11-11 17:11:07.237489
+duration: 0.833763
+
+id: 13
+command: cw 15
+response: b'ok'
+start time: 2020-11-11 17:11:10.008387
+end_time: 2020-11-11 17:11:10.865060
+duration: 0.856673
+
+id: 14
+command: ccw 15
+response: b'ok'
+start time: 2020-11-11 17:11:12.294203
+end_time: 2020-11-11 17:11:13.209395
+duration: 0.915192
+
+id: 15
+command: land
+response: b'ok'
+start time: 2020-11-11 17:11:14.923478
+end_time: 2020-11-11 17:11:19.529126
+duration: 4.605648
+
+id: 16
+command: streamoff
+response: b'ok'
+start time: 2020-11-11 17:11:20.452556
+end_time: 2020-11-11 17:11:20.504660
+duration: 0.052104
+
+id: 17
+command: land
+response: b'error'
+start time: 2020-11-11 17:11:21.499394
+end_time: 2020-11-11 17:11:21.522901
+duration: 0.023507
+

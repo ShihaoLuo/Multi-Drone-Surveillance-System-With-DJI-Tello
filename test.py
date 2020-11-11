@@ -73,6 +73,7 @@ def updatepos(_last_cmd, _last_pose, _Video, _pose_estimater):
 controller = tello_controller.Tell_Controller()
 pose_estimater = pose_estimater.PoseEstimater('SIFT', 15)
 pose_estimater.loaddata('pose_estimater/dataset/')
+pose_estimater.modifydata('post', False, False)
 frame = None
 pose = np.array([-450, 0, 70, 0])
 move_command = ['forward 100', 'left 100', 'right 100', 'back 100', 'left 100', 'right 100']

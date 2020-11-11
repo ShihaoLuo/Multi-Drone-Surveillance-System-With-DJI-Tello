@@ -170,14 +170,15 @@ class PoseEstimater():
             #print(inliers)
             #print('tvec/n{}'.format(tvec/2))
             if RR is True and len(inliers)>=6:
-                R = np.zeros((3, 3), dtype=np.float64)
-                cv.Rodrigues(rvec, R)
-                sy = math.sqrt(R[2, 2] * R[2, 2] + R[2, 1] * R[2, 1])
+                rotM = np.array(cv.Rodrigues(rvec)[0])
+                R = rotM
+                print(R)
+                sy = math.sqrt(R[0, 0] * R[0, 0] + R[0, 1] * R[0, 1])
                 singular = sy < 1e-6
                 if not singular:
-                    x = math.atan2(R[2, 1], R[2, 2]) * 180.0 / 3.1415926
-                    y = math.atan2(-R[2, 0], sy) * 180.0 / 3.1415926
-                    z = math.atan2(R[1, 0], R[0, 0]) * 180.0 / 3.1415926
+                    x = math.atan2(R[1, 2], R[2, 2])
+                    y = math.atan2(-R[0, 2], sy)
+                    z = math.atan2(math.sin(x)*R[2, 0]-math.cos(x)*R[1, 0], math.cos(x)*R[1, 1]-math.sin(x)*R[2, 1])
                 else:
                     x = math.atan2(-R[1, 2], R[1, 1])
                     y = math.atan2(-R[2, 0], sy)
@@ -186,12 +187,12 @@ class PoseEstimater():
                 # print('x: {}\ny: {}\nz: {}'.format(x, y, z))
                 # print('rvec:{}\n'.format(rvec))
                 # print('tvec:{}\n'.format(tvec))
-                rotM = np.array(cv.Rodrigues(rvec)[0])
+                #rotM = np.array(cv.Rodrigues(rvec)[0])
                 # print('rotM {}\n)'.format(rotM))
                 # print(-np.linalg.inv(rotM))
                 pose = np.dot(np.linalg.inv(-rotM), tvec)
                 #print(inliers)
-                return pose, z+90
+                return pose, z *180/3.1416 +90
             else:
                 return None, None
         else:
