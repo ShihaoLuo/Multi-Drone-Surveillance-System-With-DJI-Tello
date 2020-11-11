@@ -1,0 +1,115 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2020-11-10 16:30:21.945138
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2020-11-10 16:30:23.948244
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: None
+start time: 2020-11-10 16:30:25.953018
+end_time: None
+duration: None
+
+id: 3
+command: command
+response: None
+start time: 2020-11-10 16:30:27.956895
+end_time: None
+duration: None
+
+id: 4
+command: command
+response: None
+start time: 2020-11-10 16:30:29.961666
+end_time: None
+duration: None
+
+id: 5
+command: command
+response: None
+start time: 2020-11-10 16:30:31.965395
+end_time: None
+duration: None
+
+id: 6
+command: command
+response: b'ok'
+start time: 2020-11-10 16:30:33.970191
+end_time: 2020-11-10 16:30:34.025481
+duration: 0.05529
+
+id: 7
+command: battery?
+response: b'83\r\n'
+start time: 2020-11-10 16:30:35.986666
+end_time: 2020-11-10 16:30:36.020312
+duration: 0.033646
+
+id: 8
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-11-10 16:30:38.055135
+end_time: 2020-11-10 16:30:38.110942
+duration: 0.055807
+
+id: 9
+command: speed 100
+response: b'ok'
+start time: 2020-11-10 16:30:41.192566
+end_time: 2020-11-10 16:30:41.223113
+duration: 0.030547
+
+id: 10
+command: setfps high
+response: b'ok'
+start time: 2020-11-10 16:30:42.219220
+end_time: 2020-11-10 16:30:42.237809
+duration: 0.018589
+
+id: 11
+command: setresolution high
+response: b'ok'
+start time: 2020-11-10 16:30:43.269523
+end_time: 2020-11-10 16:30:43.313734
+duration: 0.044211
+
+id: 12
+command: takeoff
+response: b'ok'
+start time: 2020-11-10 16:30:45.347963
+end_time: 2020-11-10 16:30:49.990863
+duration: 4.6429
+
+id: 13
+command: up 170
+response: b'ok'
+start time: 2020-11-10 16:30:50.021594
+end_time: 2020-11-10 16:30:53.258235
+duration: 3.236641
+
+id: 14
+command: streamon
+response: b'ok'
+start time: 2020-11-10 16:30:53.288972
+end_time: 2020-11-10 16:30:53.304245
+duration: 0.015273
+
+id: 15
+command: command
+response: b'ok'
+start time: 2020-11-10 16:30:58.877044
+end_time: 2020-11-10 16:30:58.923080
+duration: 0.046036
+

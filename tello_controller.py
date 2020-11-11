@@ -198,14 +198,13 @@ class Tell_Controller:
                             time.sleep(wait_time)
                         break
                     wait_time = cnt
-
         # wait till all commands are executed
         while not self.all_queue_empty(self.execution_pools):
-            time.sleep(0.5)
+            time.sleep(0.01)
         time.sleep(1)
         # wait till all responses are received
         while not self.all_got_response(self.manager):
-            time.sleep(0.5)
+            time.sleep(0.01)
         self.save_log(self.manager)
 
     def scan(self, num_of_tello):

@@ -1,0 +1,108 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2020-11-10 15:19:51.182498
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2020-11-10 15:19:53.186039
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: None
+start time: 2020-11-10 15:19:55.190057
+end_time: None
+duration: None
+
+id: 3
+command: command
+response: b'ok'
+start time: 2020-11-10 15:19:57.193811
+end_time: 2020-11-10 15:19:57.251280
+duration: 0.057469
+
+id: 4
+command: battery?
+response: b'100\r\n'
+start time: 2020-11-10 15:19:59.250891
+end_time: 2020-11-10 15:19:59.275698
+duration: 0.024807
+
+id: 5
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-11-10 15:20:01.813684
+end_time: 2020-11-10 15:20:01.838540
+duration: 0.024856
+
+id: 6
+command: setfps high
+response: b'ok'
+start time: 2020-11-10 15:20:04.397969
+end_time: 2020-11-10 15:20:04.428671
+duration: 0.030702
+
+id: 7
+command: setresolution high
+response: b'ok'
+start time: 2020-11-10 15:20:05.440037
+end_time: 2020-11-10 15:20:05.511125
+duration: 0.071088
+
+id: 8
+command: takeoff
+response: b'ok'
+start time: 2020-11-10 15:20:07.518771
+end_time: 2020-11-10 15:20:14.278760
+duration: 6.759989
+
+id: 9
+command: up 170
+response: b'ok'
+start time: 2020-11-10 15:20:15.572842
+end_time: 2020-11-10 15:20:18.715159
+duration: 3.142317
+
+id: 10
+command: go -100 100 0 100
+response: b'ok'
+start time: 2020-11-10 15:20:20.613703
+end_time: 2020-11-10 15:20:24.275777
+duration: 3.662074
+
+id: 11
+command: go 100 -100 0 100
+response: b'ok'
+start time: 2020-11-10 15:20:24.275827
+end_time: 2020-11-10 15:20:30.138159
+duration: 5.862332
+
+id: 12
+command: go -100 100 0 100
+response: b'ok'
+start time: 2020-11-10 15:20:30.138204
+end_time: 2020-11-10 15:20:33.707928
+duration: 3.569724
+
+id: 13
+command: go 100 -100 0 100
+response: b'ok'
+start time: 2020-11-10 15:20:33.707978
+end_time: 2020-11-10 15:20:38.042527
+duration: 4.334549
+
+id: 14
+command: land
+response: None
+start time: 2020-11-10 15:20:38.042568
+end_time: None
+duration: None
+

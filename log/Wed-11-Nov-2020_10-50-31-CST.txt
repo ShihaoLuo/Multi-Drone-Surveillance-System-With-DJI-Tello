@@ -1,0 +1,87 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: b'ok'
+start time: 2020-11-11 10:50:31.098838
+end_time: 2020-11-11 10:50:31.172913
+duration: 0.074075
+
+id: 1
+command: battery?
+response: b'26\r\n'
+start time: 2020-11-11 10:50:33.119556
+end_time: 2020-11-11 10:50:33.153024
+duration: 0.033468
+
+id: 2
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-11-11 10:50:35.688661
+end_time: 2020-11-11 10:50:35.712599
+duration: 0.023938
+
+id: 3
+command: setfps high
+response: b'ok'
+start time: 2020-11-11 10:50:38.788840
+end_time: 2020-11-11 10:50:38.823571
+duration: 0.034731
+
+id: 4
+command: setresolution high
+response: b'ok'
+start time: 2020-11-11 10:50:39.835548
+end_time: 2020-11-11 10:50:39.894393
+duration: 0.058845
+
+id: 5
+command: takeoff
+response: b'ok'
+start time: 2020-11-11 10:50:41.919142
+end_time: 2020-11-11 10:50:50.654939
+duration: 8.735797
+
+id: 6
+command: up 170
+response: b'ok'
+start time: 2020-11-11 10:50:50.685672
+end_time: 2020-11-11 10:50:54.169274
+duration: 3.483602
+
+id: 7
+command: streamon
+response: b'ok'
+start time: 2020-11-11 10:50:54.185178
+end_time: 2020-11-11 10:50:54.225028
+duration: 0.03985
+
+id: 8
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 10:50:55.247821
+end_time: 2020-11-11 10:50:57.997731
+duration: 2.74991
+
+id: 9
+command: go -42 128 -2 100
+response: b'ok'
+start time: 2020-11-11 10:50:58.232253
+end_time: 2020-11-11 10:51:00.995901
+duration: 2.763648
+
+id: 10
+command: ccw 87
+response: b'ok'
+start time: 2020-11-11 10:51:01.188900
+end_time: 2020-11-11 10:51:03.298381
+duration: 2.109481
+
+id: 11
+command: go 122 -22 1 100
+response: b'ok'
+start time: 2020-11-11 10:51:03.440338
+end_time: 2020-11-11 10:51:06.261476
+duration: 2.821138
+

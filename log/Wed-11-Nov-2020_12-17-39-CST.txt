@@ -1,0 +1,241 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2020-11-11 12:17:39.125144
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2020-11-11 12:17:41.127701
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: b'ok'
+start time: 2020-11-11 12:17:43.130898
+end_time: 2020-11-11 12:17:43.187375
+duration: 0.056477
+
+id: 3
+command: battery?
+response: b'68\r\n'
+start time: 2020-11-11 12:17:45.151748
+end_time: 2020-11-11 12:17:45.174194
+duration: 0.022446
+
+id: 4
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-11-11 12:17:47.715648
+end_time: 2020-11-11 12:17:47.730971
+duration: 0.015323
+
+id: 5
+command: setfps high
+response: b'ok'
+start time: 2020-11-11 12:17:50.805602
+end_time: 2020-11-11 12:17:50.861914
+duration: 0.056312
+
+id: 6
+command: setresolution high
+response: b'ok'
+start time: 2020-11-11 12:17:51.847511
+end_time: 2020-11-11 12:17:51.865766
+duration: 0.018255
+
+id: 7
+command: takeoff
+response: b'ok'
+start time: 2020-11-11 12:17:53.915984
+end_time: 2020-11-11 12:18:00.994491
+duration: 7.078507
+
+id: 8
+command: up 170
+response: b'ok'
+start time: 2020-11-11 12:18:01.025233
+end_time: 2020-11-11 12:18:04.002878
+duration: 2.977645
+
+id: 9
+command: streamon
+response: b'ok'
+start time: 2020-11-11 12:18:04.044142
+end_time: 2020-11-11 12:18:04.106283
+duration: 0.062141
+
+id: 10
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:05.132531
+end_time: 2020-11-11 12:18:08.591716
+duration: 3.459185
+
+id: 11
+command: go 136 -19 -24 100
+response: b'ok'
+start time: 2020-11-11 12:18:08.829426
+end_time: 2020-11-11 12:18:11.909672
+duration: 3.080246
+
+id: 12
+command: ccw 91
+response: b'ok'
+start time: 2020-11-11 12:18:12.116891
+end_time: 2020-11-11 12:18:14.303045
+duration: 2.186154
+
+id: 13
+command: go -25 -100 -21 100
+response: b'ok'
+start time: 2020-11-11 12:18:14.375016
+end_time: 2020-11-11 12:18:17.307879
+duration: 2.932863
+
+id: 14
+command: go 99 -1 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:17.454904
+end_time: 2020-11-11 12:18:20.579763
+duration: 3.124859
+
+id: 15
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:20.729765
+end_time: 2020-11-11 12:18:23.769005
+duration: 3.03924
+
+id: 16
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:23.830886
+end_time: 2020-11-11 12:18:26.698509
+duration: 2.867623
+
+id: 17
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:26.856101
+end_time: 2020-11-11 12:18:30.116947
+duration: 3.260846
+
+id: 18
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:30.273150
+end_time: 2020-11-11 12:18:33.435804
+duration: 3.162654
+
+id: 19
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:33.599094
+end_time: 2020-11-11 12:18:37.210423
+duration: 3.611329
+
+id: 20
+command: ccw 90.0
+response: b'ok'
+start time: 2020-11-11 12:18:37.353649
+end_time: 2020-11-11 12:18:39.520233
+duration: 2.166584
+
+id: 21
+command: go 99 -1 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:39.705188
+end_time: 2020-11-11 12:18:43.073523
+duration: 3.368335
+
+id: 22
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:43.198029
+end_time: 2020-11-11 12:18:46.240907
+duration: 3.042878
+
+id: 23
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:46.405591
+end_time: 2020-11-11 12:18:49.659119
+duration: 3.253528
+
+id: 24
+command: ccw 90.0
+response: b'ok'
+start time: 2020-11-11 12:18:49.807787
+end_time: 2020-11-11 12:18:51.954016
+duration: 2.146229
+
+id: 25
+command: go 98 -1 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:52.095953
+end_time: 2020-11-11 12:18:55.172933
+duration: 3.07698
+
+id: 26
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:55.336730
+end_time: 2020-11-11 12:18:58.423582
+duration: 3.086852
+
+id: 27
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:18:58.585757
+end_time: 2020-11-11 12:19:01.642494
+duration: 3.056737
+
+id: 28
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:19:01.768054
+end_time: 2020-11-11 12:19:04.906156
+duration: 3.138102
+
+id: 29
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:19:05.060989
+end_time: 2020-11-11 12:19:08.287017
+duration: 3.226028
+
+id: 30
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:19:08.446336
+end_time: 2020-11-11 12:19:11.480416
+duration: 3.03408
+
+id: 31
+command: ccw -270.0
+response: b'ok'
+start time: 2020-11-11 12:19:11.616351
+end_time: 2020-11-11 12:19:16.797399
+duration: 5.181048
+
+id: 32
+command: go 99 0 0 100
+response: b'ok'
+start time: 2020-11-11 12:19:16.976203
+end_time: 2020-11-11 12:19:19.860041
+duration: 2.883838
+
+id: 33
+command: land
+response: b'ok'
+start time: 2020-11-11 12:19:20.060092
+end_time: 2020-11-11 12:19:25.360923
+duration: 5.300831
+

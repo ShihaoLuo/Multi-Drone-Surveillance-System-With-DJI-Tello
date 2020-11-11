@@ -25,7 +25,7 @@ def process_frame(_video, _pose_estimater):
     while True:
         _frame = _video.get_frame()
         if _frame is not None:
-            pose, yaw = _pose_estimater.estimate_pose(img_query, _frame)
+            pose, yaw = _pose_estimater.estimate_pose(_frame)
             if pose is not None:
                 print("Pose in the world is {} {}".format(pose, yaw))
                 #logging.info("\n{}".format(pose))

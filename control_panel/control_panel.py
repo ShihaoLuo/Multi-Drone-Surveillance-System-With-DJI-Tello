@@ -23,6 +23,8 @@ class CtrPanel:
         cv.putText(self.ui, 'l:land', (300, 350), cv.FONT_HERSHEY_PLAIN, 2.0, (255, 255, 255))
         self.diaplsy_thread = threading.Thread(target=self.displayui, args=())
         self.state_thread = threading.Thread(target=self.compu_state, args=())
+        self.controller.command('*>speed 100')
+        self.delaytime = 0.2
 
     def _async_raise(self, tid, exctype):
         tid = ctypes.c_long(tid)
@@ -54,18 +56,32 @@ class CtrPanel:
                 break
             elif key == ord('w'):
                 self.controller.command('*>forward 50')
+                time.sleep(0.5+self.delaytime)
+                now = time.time()
             elif key == ord('s'):
                 self.controller.command('*>back 50')
+                time.sleep(0.5+self.delaytime)
+                now = time.time()
             elif key == ord('a'):
                 self.controller.command('*>left 50')
+                time.sleep(0.5+self.delaytime)
+                now = time.time()
             elif key == ord('d'):
                 self.controller.command('*>right 50')
+                time.sleep(0.5+self.delaytime)
+                now = time.time()
             elif key == ord('q'):
                 self.controller.command('*>ccw 15')
+                time.sleep(0.5+self.delaytime)
+                now = time.time()
             elif key == ord('e'):
                 self.controller.command('*>cw 15')
+                time.sleep(0.5+self.delaytime)
+                now = time.time()
             elif key == ord('l'):
                 self.controller.command('*>land')
+                time.sleep(0.5+self.delaytime)
+                now = time.time()
             else:
                 if time.time() - now >= 4.5:
                     self.controller.command('*>command')

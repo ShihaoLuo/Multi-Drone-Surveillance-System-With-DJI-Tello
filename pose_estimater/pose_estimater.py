@@ -86,10 +86,10 @@ class PoseEstimater():
     def read_from_npy(self, _file):
         return np.load(_file)
 
-    def pic_match(self, _img_query, _img):
+    def pic_match(self, _img):
         img_test = _img
         #img_test = cv.filter2D(img_test, -1, self.kernel)
-        img_query = _img_query
+        #img_query = _img_query
         kp_test, des_test = self.detecter.detectAndCompute(img_test, None)
         FLANN_INDEX_KDTREE = 1
         index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
@@ -123,13 +123,13 @@ class PoseEstimater():
                 M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
                 matchesMask = mask.ravel().tolist()
                 if M is not None and mask is not None:
-                    h, w = img_query.shape
+                    #h, w = img_query.shape
                     d = 1
-                    pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-                    dst = cv.perspectiveTransform(pts, M)
+                    #pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+                    #dst = cv.perspectiveTransform(pts, M)
                     pxel = self.dataset[obj]['wpixel'].reshape(-1, 1, 2)
                     pxel = cv.perspectiveTransform(pxel, M)
-                    if self.showmatchflag == 1:
+                    '''if self.showmatchflag == 1:
                         #print('sss {}'.format(wpxel))
                         img_test = cv.polylines(img_test, [np.int32(dst)], True, 255, 1, cv.LINE_AA)
                         draw_params = dict(matchColor=(0, 255, 0),
@@ -144,12 +144,12 @@ class PoseEstimater():
                         img = mimg
                         for p in point:
                             img = cv.circle(img, p, 4, (255, 0, 0), -1)
-                        self.queue.put(img)
-                return obj, pxel
+                        self.queue.put(img)'''
+                    return obj, pxel
         return None, None
 
-    def estimate_pose(self, _img_query, _img):
-        obj, _wpxel = self.pic_match(_img_query, _img)
+    def estimate_pose(self, _img):
+        obj, _wpxel = self.pic_match(_img)
         if obj is not None and _wpxel is not None:
             wpt = self.dataset[obj]['wpoint'].reshape(-1, 1, 3)
             _wpxel = _wpxel.reshape(-1, 1, 2)
@@ -172,7 +172,7 @@ class PoseEstimater():
             if RR is True and len(inliers)>=6:
                 R = np.zeros((3, 3), dtype=np.float64)
                 cv.Rodrigues(rvec, R)
-                sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
+                sy = math.sqrt(R[2, 2] * R[2, 2] + R[2, 1] * R[2, 1])
                 singular = sy < 1e-6
                 if not singular:
                     x = math.atan2(R[2, 1], R[2, 2]) * 180.0 / 3.1415926
@@ -191,7 +191,7 @@ class PoseEstimater():
                 # print(-np.linalg.inv(rotM))
                 pose = np.dot(np.linalg.inv(-rotM), tvec)
                 #print(inliers)
-                return pose, y
+                return pose, z+90
             else:
                 return None, None
         else:
@@ -213,11 +213,13 @@ class PoseEstimater():
             for i in self.dataset.keys():
                 print('-----------dataset-----------\n')
                 print('----------{}----------\n'.format(i))
-                print(self.dataset[i])
+                for k in self.dataset[i].keys():
+                    print(self.dataset[i][k])
         else:
             print('-----------dataset-----------\n')
             print('----------{}----------\n'.format(_obj))
-            print(self.dataset[_obj])
+            for k in self.dataset[_obj].keys():
+                print(self.dataset[_obj][k])
 
     def show_match(self):
         while True:
@@ -240,6 +242,29 @@ class PoseEstimater():
                 img = cv.circle(img, p, 2, (255, 0, 0), -1)
             plt.imshow(img)
             plt.show()
+
+    def modifydata(self, obj=None, pixel=True, point=True):
+        self.showdataset()
+        wpixel = np.array([])
+        wpoint = np.array([])
+        for i in range(8):
+            if pixel==True:
+                wpxlx = input('input the x of No.{} wpixel:'.format(i + 1))
+                wpxly = input('input the y of No.{} wpixel:'.format(i + 1))
+                wpxl = np.array([float(wpxlx), float(wpxly)])
+                wpixel = np.append(wpixel, wpxl)
+            if point==True:
+                wptx = input('input the x of No.{} wpoint:'.format(i + 1))
+                wpty = input('input the y of No.{} wpoint:'.format(i + 1))
+                wptz = input('input the z of No.{} wpoint:'.format(i + 1))
+                wpt = np.array([float(wptx), float(wpty), float(wptz)])
+                wpoint = np.append(wpoint, wpt)
+        if obj==None:
+            obj = input('the object modified:')
+        if pixel==True:
+            self.save_2_npy('/home/jakeluo/tello_project/pose_estimater/dataset/' + obj + '/wpixel.npy', wpixel)
+        if point==True:
+            self.save_2_npy('/home/jakeluo/tello_project/pose_estimater/dataset/' + obj + '/wpoint.npy', wpoint)
 
 
 '''OBJ = pose_estimater()

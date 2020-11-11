@@ -1,0 +1,122 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2020-11-11 11:33:07.445551
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2020-11-11 11:33:09.449188
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: None
+start time: 2020-11-11 11:33:11.453238
+end_time: None
+duration: None
+
+id: 3
+command: command
+response: None
+start time: 2020-11-11 11:33:13.457025
+end_time: None
+duration: None
+
+id: 4
+command: command
+response: None
+start time: 2020-11-11 11:33:15.459684
+end_time: None
+duration: None
+
+id: 5
+command: command
+response: None
+start time: 2020-11-11 11:33:17.462027
+end_time: None
+duration: None
+
+id: 6
+command: command
+response: b'ok'
+start time: 2020-11-11 11:33:19.464678
+end_time: 2020-11-11 11:33:19.538266
+duration: 0.073588
+
+id: 7
+command: battery?
+response: b'70\r\n'
+start time: 2020-11-11 11:33:21.490927
+end_time: 2020-11-11 11:33:21.516966
+duration: 0.026039
+
+id: 8
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-11-11 11:33:24.054886
+end_time: 2020-11-11 11:33:24.119818
+duration: 0.064932
+
+id: 9
+command: setfps high
+response: b'ok'
+start time: 2020-11-11 11:33:27.644916
+end_time: 2020-11-11 11:33:27.689595
+duration: 0.044679
+
+id: 10
+command: setresolution high
+response: b'ok'
+start time: 2020-11-11 11:33:28.696925
+end_time: 2020-11-11 11:33:28.767051
+duration: 0.070126
+
+id: 11
+command: takeoff
+response: b'ok'
+start time: 2020-11-11 11:33:30.765612
+end_time: 2020-11-11 11:33:38.552016
+duration: 7.786404
+
+id: 12
+command: up 170
+response: b'ok'
+start time: 2020-11-11 11:33:38.587881
+end_time: 2020-11-11 11:33:41.674432
+duration: 3.086551
+
+id: 13
+command: streamon
+response: b'ok'
+start time: 2020-11-11 11:33:41.700505
+end_time: 2020-11-11 11:33:41.754666
+duration: 0.054161
+
+id: 14
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-11-11 11:33:42.798601
+end_time: 2020-11-11 11:33:45.695611
+duration: 2.89701
+
+id: 15
+command: go 111 -26 -20 100
+response: b'ok'
+start time: 2020-11-11 11:33:46.936876
+end_time: 2020-11-11 11:33:49.820321
+duration: 2.883445
+
+id: 16
+command: ccw 92.0
+response: b'ok'
+start time: 2020-11-11 11:33:50.963483
+end_time: 2020-11-11 11:33:53.223451
+duration: 2.259968
+
