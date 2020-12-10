@@ -73,7 +73,7 @@ def updatepos(_last_cmd, _last_pose, _Video, _pose_estimater):
 controller = tello_controller.Tell_Controller()
 pose_estimater = pose_estimater.PoseEstimater('SIFT', 15)
 pose_estimater.loaddata('pose_estimater/dataset/')
-pose_estimater.modifydata('post', False, False)
+#pose_estimater.modifydata('post', False, False)
 frame = None
 pose = np.array([-450, 0, 70, 0])
 move_command = ['forward 100', 'left 100', 'right 100', 'back 100', 'left 100', 'right 100']
@@ -118,6 +118,7 @@ try:
     print("Pose in the drone_world is {}".format(pose))
     controller.command("*>streamon")
     for i in range(3):
+        controller.command('*>battery?')
         for target in path:
             print("--------------------------")
             print("target:{}".format(target))
@@ -131,11 +132,11 @@ try:
                 pass
             else:
                 alpha = pose[3] * 3.1416 / 180
-                print("alpha:{}".format(alpha))
+                #print("alpha:{}".format(alpha))
                 M = np.array([[np.cos(alpha), np.sin(alpha), 0],
                               [-np.sin(alpha), np.cos(alpha), 0],
                               [0, 0, 1]])
-                print("M: {}".format(M))
+                #print("M: {}".format(M))
                 tmp = target[0:3]-pose[0:3]
                 tmp = np.dot(M, tmp)
                 #tmp = [int(i) for i in tmp]

@@ -1,0 +1,108 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2020-11-13 18:19:01.339282
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2020-11-13 18:19:03.342887
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: b'ok'
+start time: 2020-11-13 18:19:05.347257
+end_time: 2020-11-13 18:19:05.420230
+duration: 0.072973
+
+id: 3
+command: battery?
+response: b'100\r\n'
+start time: 2020-11-13 18:19:07.357895
+end_time: 2020-11-13 18:19:07.416521
+duration: 0.058626
+
+id: 4
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-11-13 18:19:09.926853
+end_time: 2020-11-13 18:19:09.959223
+duration: 0.03237
+
+id: 5
+command: setfps high
+response: b'ok'
+start time: 2020-11-13 18:19:13.516548
+end_time: 2020-11-13 18:19:13.580082
+duration: 0.063534
+
+id: 6
+command: setresolution high
+response: b'ok'
+start time: 2020-11-13 18:19:14.563581
+end_time: 2020-11-13 18:19:14.599906
+duration: 0.036325
+
+id: 7
+command: takeoff
+response: b'ok'
+start time: 2020-11-13 18:19:16.646597
+end_time: 2020-11-13 18:19:23.015307
+duration: 6.36871
+
+id: 8
+command: up 170
+response: b'ok'
+start time: 2020-11-13 18:19:23.051114
+end_time: 2020-11-13 18:19:26.274146
+duration: 3.223032
+
+id: 9
+command: streamon
+response: b'ok'
+start time: 2020-11-13 18:19:26.315355
+end_time: 2020-11-13 18:19:26.384152
+duration: 0.068797
+
+id: 10
+command: battery?
+response: b'100\r\n'
+start time: 2020-11-13 18:19:27.357374
+end_time: 2020-11-13 18:19:27.401145
+duration: 0.043771
+
+id: 11
+command: go 200 0 0 100
+response: b'ok'
+start time: 2020-11-13 18:19:28.409713
+end_time: 2020-11-13 18:19:32.752967
+duration: 4.343254
+
+id: 12
+command: ccw 90.0
+response: b'ok'
+start time: 2020-11-13 18:19:32.896379
+end_time: 2020-11-13 18:19:35.011721
+duration: 2.115342
+
+id: 13
+command: go 99 0 0 100
+response: b'ok'
+start time: 2020-11-13 18:19:35.167982
+end_time: 2020-11-13 18:19:38.415391
+duration: 3.247409
+
+id: 14
+command: go 100 0 0 100
+response: None
+start time: 2020-11-13 18:19:38.551032
+end_time: None
+duration: None
+

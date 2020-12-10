@@ -1,0 +1,17 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: b'ok'
+start time: 2020-12-10 17:31:38.627182
+end_time: 2020-12-10 17:31:38.693472
+duration: 0.06629
+
+id: 1
+command: battery?
+response: b'70\r\n'
+start time: 2020-12-10 17:31:40.663949
+end_time: 2020-12-10 17:31:40.719674
+duration: 0.055725
+

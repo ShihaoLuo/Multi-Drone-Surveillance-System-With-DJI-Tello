@@ -10,6 +10,7 @@ import inspect
 import ctypes
 import queue
 
+
 # import binascii
 class Tello:
     """
@@ -17,9 +18,10 @@ class Tello:
     Communication with Tello is handled by Tello_Manager
     """
 
-    def __init__(self, tello_ip, _Tello_Manager):
+    def __init__(self, tello_ip, video_port,_Tello_Manager):
         self.tello_ip = tello_ip
         self.Tello_Manager = _Tello_Manager
+        self.videoport = video_port
 
     def send_command(self, command):
         return self.Tello_Manager.send_command(command, self.tello_ip)
@@ -46,6 +48,7 @@ class Tello_Manager:
         self.last_response_index = {}
         self.str_cmd_index = {}
         self.response = None
+        self.videoportbase = 20000
         self.state_field_converters = {
                 # Tello EDU with mission pads enabled only
                 'mid': int,
@@ -254,11 +257,17 @@ class Tello_Manager:
                 # print(self.response.decode()=='ok')
                 if self.response.decode(encoding='utf-8',
                                         errors='ignore').upper() == 'OK' and ip not in self.tello_ip_list:
-                    print ('[Found_Tello]Found Tello.The Tello ip is:%s\n' % ip)
-                    self.tello_ip_list.append(ip)
-                    self.last_response_index[ip] = 100
-                    self.tello_list.append(Tello(ip, self))
-                    self.str_cmd_index[ip] = 1
+                    port = self.videoportbase + int(str(ip).split('.')[3])
+                    self.socket.sendto(('port 8890 ' + str(port)).encode('utf-8'), (ip, 8889))
+                    time.sleep(0.5)
+                    self.response, ip = self.socket.recvfrom(1024)
+                    if self.response.decode(encoding='utf-8',
+                                            errors='ignore').upper() == 'OK':
+                        print('[Found_Tello]Found Tello.The Tello ip is:%s.Video port id:%d\n' % (ip, port))
+                        self.tello_ip_list.append(ip)
+                        self.last_response_index[ip] = 100
+                        self.tello_list.append(Tello(ip, port, self))
+                        self.str_cmd_index[ip] = 1
 
                 response_sof_part1 = self.response[0]
                 response_sof_part2 = self.response[1]
