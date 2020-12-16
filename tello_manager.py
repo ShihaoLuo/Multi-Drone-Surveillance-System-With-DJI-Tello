@@ -44,7 +44,7 @@ class Tello_Manager:
         self.tello_ip_list = []
         self.tello_list = []
         self.log = defaultdict(list)
-        self.COMMAND_TIME_OUT = 9.0
+        self.COMMAND_TIME_OUT = 5.0
         self.last_response_index = {}
         self.str_cmd_index = {}
         self.response = None
@@ -200,15 +200,19 @@ class Tello_Manager:
             self.socket.sendto(command.encode('utf-8'), (ip, 8889))
             print ('[Single_Command]----Single_Send----IP:%s----Command:   %s\n' % (ip, command))
             real_command = command
-
-        self.log[ip].append(Stats(real_command, len(self.log[ip])))
         start = time.time()
+        print(self.log[ip][-1].got_response())
         while not self.log[ip][-1].got_response():
             now = time.time()
             diff = now - start
+            print('diff:', diff)
             if diff > self.COMMAND_TIME_OUT:
                 print ('[Not_Get_Response]Max timeout exceeded...command: %s \n' % real_command)
-                return
+                start = time.time()
+                print('cmd in manager:', command)
+                self.socket.sendto(command.encode('utf-8'), (ip, 8889))
+                print('[Single_Command]----Single_Send_again----IP:%s----Command:   %s\n' % (ip, command))
+        self.log[ip].append(Stats(real_command, len(self.log[ip])))
 
     def parse_state(self, state):
         """Parse a state line to a dictionary
@@ -279,11 +283,12 @@ class Tello_Manager:
                         print('[Multi_Response] ----Multi_Receive----IP:%s----Response:   %s ----\n' % (
                             ip, self.response[7:].decode('utf-8')))
                         self.log[ip][-1].add_response(self.response[7:], ip)
+
                     self.last_response_index[ip] = response_index
                 else:
                     print('[Single_Response]----Single_Receive----IP:%s----Response:   %s ----\n' % (ip, self.response.decode('utf-8')))
                     self.log[ip][-1].add_response(self.response, ip)
-                # print'[Response_WithIP]----Receive----IP:%s----Response:%s----\n' % (ip, self.response)
+                #print('[Response_WithIP]----Receive----IP:%s----Response:%s----\n' % (ip, self.response))
 
             except socket.error as exc:
                 print ("[Exception_Error(rev)]Caught exception socket.error : %s\n" % exc)

@@ -1,0 +1,230 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:00.385175
+end_time: 2020-12-16 23:39:00.961283
+duration: 0.576108
+
+id: 1
+command: battery?
+response: b'58\r\n'
+start time: 2020-12-16 23:39:04.665614
+end_time: 2020-12-16 23:39:05.541530
+duration: 0.875916
+
+id: 2
+command: sn?
+response: b'0TQDG43EDB8YQ9'
+start time: 2020-12-16 23:39:12.046325
+end_time: 2020-12-16 23:39:12.611344
+duration: 0.565019
+
+id: 3
+command: streamon
+response: b'ok'
+start time: 2020-12-16 23:39:26.172100
+end_time: 2020-12-16 23:39:26.191160
+duration: 0.01906
+
+id: 4
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:28.589166
+end_time: 2020-12-16 23:39:28.859006
+duration: 0.26984
+
+id: 5
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:31.141840
+end_time: 2020-12-16 23:39:31.488071
+duration: 0.346231
+
+id: 6
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:40.673995
+end_time: 2020-12-16 23:39:40.913069
+duration: 0.239074
+
+id: 7
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:43.267970
+end_time: 2020-12-16 23:39:43.410513
+duration: 0.142543
+
+id: 8
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:45.419771
+end_time: 2020-12-16 23:39:45.460503
+duration: 0.040732
+
+id: 9
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:49.571475
+end_time: 2020-12-16 23:39:49.631092
+duration: 0.059617
+
+id: 10
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:52.157960
+end_time: 2020-12-16 23:39:52.199778
+duration: 0.041818
+
+id: 11
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:56.182634
+end_time: 2020-12-16 23:39:56.264075
+duration: 0.081441
+
+id: 12
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:58.384690
+end_time: 2020-12-16 23:39:58.567869
+duration: 0.183179
+
+id: 13
+command: command
+response: b'ok'
+start time: 2020-12-16 23:40:03.256142
+end_time: 2020-12-16 23:40:03.269719
+duration: 0.013577
+
+id: 14
+command: command
+response: b'ok'
+start time: 2020-12-16 23:40:05.681761
+end_time: 2020-12-16 23:40:05.753145
+duration: 0.071384
+
+id: 15
+command: command
+response: b'ok'
+start time: 2020-12-16 23:40:09.771974
+end_time: 2020-12-16 23:40:09.813044
+duration: 0.04107
+
+id: 16
+command: command
+response: b'ok'
+start time: 2020-12-16 23:40:13.300046
+end_time: 2020-12-16 23:40:13.752986
+duration: 0.45294
+
+------
+Drone: 2
+
+id: 0
+command: command
+response: None
+start time: 2020-12-16 23:39:00.385758
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:02.388613
+end_time: 2020-12-16 23:39:02.935053
+duration: 0.54644
+
+id: 2
+command: battery?
+response: b'38\r\n'
+start time: 2020-12-16 23:39:04.670732
+end_time: 2020-12-16 23:39:05.541453
+duration: 0.870721
+
+id: 3
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-12-16 23:39:12.041213
+end_time: 2020-12-16 23:39:13.395200
+duration: 1.353987
+
+id: 4
+command: streamon
+response: b'ok'
+start time: 2020-12-16 23:39:27.428136
+end_time: 2020-12-16 23:39:27.529922
+duration: 0.101786
+
+id: 5
+command: command
+response: b'ok'
+start time: 2020-12-16 23:39:28.584105
+end_time: 2020-12-16 23:39:28.853903
+duration: 0.269798
+
+id: 6
+command: takeoff
+response: b'ok'
+start time: 2020-12-16 23:39:31.034474
+end_time: 2020-12-16 23:39:38.061558
+duration: 7.027084
+
+id: 7
+command: up 170
+response: b'ok'
+start time: 2020-12-16 23:39:38.108199
+end_time: 2020-12-16 23:39:41.285139
+duration: 3.17694
+
+id: 8
+command: streamon
+response: b'ok'
+start time: 2020-12-16 23:39:44.893725
+end_time: 2020-12-16 23:39:44.980406
+duration: 0.086681
+
+id: 9
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-12-16 23:39:46.310559
+end_time: 2020-12-16 23:39:49.269088
+duration: 2.958529
+
+id: 10
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-12-16 23:39:52.357998
+end_time: 2020-12-16 23:39:55.417311
+duration: 3.059313
+
+id: 11
+command: ccw 90
+response: b'ok'
+start time: 2020-12-16 23:40:00.252560
+end_time: 2020-12-16 23:40:02.394105
+duration: 2.141545
+
+id: 12
+command: go 97 0 26 100
+response: b'ok'
+start time: 2020-12-16 23:40:06.722894
+end_time: 2020-12-16 23:40:09.620037
+duration: 2.897143
+
+id: 13
+command: go 100 0 0 100
+response: b'ok'
+start time: 2020-12-16 23:40:09.807988
+end_time: 2020-12-16 23:40:12.920154
+duration: 3.112166
+
+id: 14
+command: streamoff
+response: None
+start time: 2020-12-16 23:40:13.310203
+end_time: None
+duration: None
+

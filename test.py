@@ -71,43 +71,68 @@ def updatepos(_last_cmd, _last_pose, _Video, _pose_estimater):
 controller = tello_controller.Tell_Controller()
 #pose_estimater.modifydata('post', False, False)
 frame = None
-path = [[-250, 0, 70, 0],
-        [-250, 0, 70, 90],
-        [-250, 100, 70, 90],
-        [-250, 200, 70, 90],
-        [-250, 300, 70, 90],
-        [-250, 400, 70, 90],
-        [-250, 500, 70, 90],
-        [-250, 600, 70, 90],
-        [-250, 600, 70, 180],
-        [-350, 600, 70, 180],
-        [-450, 600, 70, 180],
-        [-550, 600, 70, 180],
-        [-550, 600, 70, 270],
-        [-550, 500, 70, 270],
-        [-550, 400, 70, 270],
-        [-550, 300, 70, 270],
-        [-550, 200, 70, 270],
-        [-550, 100, 70, 270],
-        [-550, 0, 70, 270],
-        [-550, 0, 70, 0],
-        [-450, 0, 70, 0],
-        [-350, 0, 70, 0],
-        [-250, 0, 70, 0]]
+path1 = [[-350, 0, 100, 0],
+         [-250, 0, 100, 0],
+        [-250, 0, 100, 90],
+        [-250, 100, 100, 90],
+        [-250, 200, 100, 90],
+        [-250, 300, 100, 90],
+        [-250, 400, 100, 90],
+        [-250, 500, 100, 90],
+        [-250, 600, 100, 90],
+        [-250, 600, 100, 180],
+        [-350, 600, 100, 180],
+        [-450, 600, 100, 180],
+        [-550, 600, 100, 180],
+        [-550, 600, 100, 270],
+        [-550, 500, 100, 270],
+        [-550, 400, 100, 270],
+        [-550, 300, 100, 270],
+        [-550, 200, 100, 270],
+        [-550, 100, 100, 270],
+        [-550, 0, 100, 270],
+        [-550, 0, 100, 0],
+        [-450, 0, 100, 0],
+        [-350, 0, 100, 0]]
+path2 = [[-350, 0, 100, 0],
+         [-250, 0, 100, 0],
+        [-250, 0, 100, 90],
+        [-250, 100, 100, 90],
+        [-250, 200, 100, 90],
+        [-250, 300, 100, 90],
+        [-250, 400, 100, 90],
+        [-250, 500, 100, 90],
+        [-250, 600, 100, 90],
+        [-250, 600, 100, 180],
+        [-350, 600, 100, 180],
+        [-450, 600, 100, 180],
+        [-550, 600, 100, 180],
+        [-550, 600, 100, 270],
+        [-550, 500, 100, 270],
+        [-550, 400, 100, 270],
+        [-550, 300, 100, 270],
+        [-550, 200, 100, 270],
+        [-550, 100, 100, 270],
+        [-550, 0, 100, 270],
+        [-550, 0, 100, 0],
+        [-450, 0, 100, 0],
+        [-350, 0, 100, 0]]
 
 try:
-    controller.scan(1)
+    controller.scan(2)
     video = tello_video.Tello_Video(controller.tello_list)
     controller.command("battery_check 20")
     controller.command("correct_ip")
     for i in range(len(controller.sn_list)):
         controller.command(str(i + 1) + "=" + controller.sn_list[i])
     Scheduler = Scheduler.Scheduler(controller, video)
-    Scheduler.init_path(2, 1, path)
+    for i in range(2):
+        Scheduler.init_path(2, i+1, eval('path'+str(i+1)), [-450, 0, 0, 0])
+    #Scheduler.init_path(1, 2, path2, [-450, 0, 0, 0])
     Scheduler.drone_init()
     #controller.command("1>takeoff")
     #controller.command('1>up 170')
-    Scheduler.run()
+    Scheduler.start()
     # for i in range(1):
     #     controller.command('1>battery?')
     #     for target in path:
@@ -138,9 +163,9 @@ try:
     #             controller.command('1>'+cmd)
     #             pose = updatepos(cmd, pose, video, pose_estimater)
     #             print("Pose in the drone_world is {}".format(pose))
-    time.sleep(3)
-    controller.command("1>land")
-    controller.command("1>streamoff")
+    print('main dying...')
+    controller.command("*>land")
+    controller.command("*>streamoff")
     controller.save_log(controller.manager)
     controller.manager.close()
     video.close()

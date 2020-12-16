@@ -56,7 +56,7 @@ class Tello_Video:
         self.receive_video_thread2.setDaemon(1)'''
 
         self.show_video_thread = multiprocessing.Process(target=self.show_pic)
-        # self.show_video_thread.setDaemon(1)
+        #self.show_video_thread.setDaemon(1)
         self.show_video_thread.start()
 
         # self.decode_thread = threading.Thread(target=self._h264_decode)
@@ -149,7 +149,7 @@ class Tello_Video:
             for tello in self.tello_list:
                 if self.queue[tello.tello_ip].qsize() > 1:
                     f = self.queue[tello.tello_ip].get()
-                    cv2.imshow(tello.tello_ip, f)
+                    #cv2.imshow(tello.tello_ip, f)
                 time.sleep(0.05)
 
     def take_pic(self, pic_name):
@@ -160,8 +160,8 @@ class Tello_Video:
         # print(f)
         cv2.imwrite(pic_name, mat)
 
-    def get_frame(self):
-        if not self.queue[self.tello_list[0].tello_ip].empty():
-            return self.queue[self.tello_list[0].tello_ip].get()
+    def get_frame(self, ip):
+        if not self.queue[ip].empty():
+            return self.queue[ip].get()
         else:
             return None

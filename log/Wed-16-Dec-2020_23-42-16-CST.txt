@@ -1,0 +1,181 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2020-12-16 23:42:16.373700
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2020-12-16 23:42:18.377600
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: None
+start time: 2020-12-16 23:42:20.381774
+end_time: None
+duration: None
+
+id: 3
+command: command
+response: None
+start time: 2020-12-16 23:42:22.385515
+end_time: None
+duration: None
+
+id: 4
+command: command
+response: None
+start time: 2020-12-16 23:42:24.388023
+end_time: None
+duration: None
+
+id: 5
+command: command
+response: b'ok'
+start time: 2020-12-16 23:42:26.391751
+end_time: 2020-12-16 23:42:26.917206
+duration: 0.525455
+
+id: 6
+command: battery?
+response: b'26\r\n'
+start time: 2020-12-16 23:42:30.505581
+end_time: 2020-12-16 23:42:31.157224
+duration: 0.651643
+
+id: 7
+command: sn?
+response: b'0TQDG43EDB8142'
+start time: 2020-12-16 23:42:37.232149
+end_time: 2020-12-16 23:42:37.471576
+duration: 0.239427
+
+id: 8
+command: streamon
+response: b'ok'
+start time: 2020-12-16 23:42:46.072490
+end_time: 2020-12-16 23:42:46.199972
+duration: 0.127482
+
+id: 9
+command: command
+response: b'ok'
+start time: 2020-12-16 23:42:48.587202
+end_time: 2020-12-16 23:42:49.244258
+duration: 0.657056
+
+id: 10
+command: command
+response: b'ok'
+start time: 2020-12-16 23:42:50.891337
+end_time: 2020-12-16 23:42:50.901740
+duration: 0.010403
+
+id: 11
+command: command
+response: b'ok'
+start time: 2020-12-16 23:42:59.154981
+end_time: 2020-12-16 23:42:59.307901
+duration: 0.15292
+
+------
+Drone: 2
+
+id: 0
+command: command
+response: None
+start time: 2020-12-16 23:42:16.373097
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2020-12-16 23:42:18.375877
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: None
+start time: 2020-12-16 23:42:20.379784
+end_time: None
+duration: None
+
+id: 3
+command: command
+response: None
+start time: 2020-12-16 23:42:22.383972
+end_time: None
+duration: None
+
+id: 4
+command: command
+response: None
+start time: 2020-12-16 23:42:24.387624
+end_time: None
+duration: None
+
+id: 5
+command: command
+response: None
+start time: 2020-12-16 23:42:26.390179
+end_time: None
+duration: None
+
+id: 6
+command: command
+response: b'ok'
+start time: 2020-12-16 23:42:28.393289
+end_time: 2020-12-16 23:42:28.949307
+duration: 0.556018
+
+id: 7
+command: battery?
+response: b'57\r\n'
+start time: 2020-12-16 23:42:30.500472
+end_time: 2020-12-16 23:42:31.157133
+duration: 0.656661
+
+id: 8
+command: sn?
+response: b'0TQDG43EDB8YQ9'
+start time: 2020-12-16 23:42:37.237255
+end_time: 2020-12-16 23:42:37.466455
+duration: 0.2292
+
+id: 9
+command: streamon
+response: b'ok'
+start time: 2020-12-16 23:42:47.309273
+end_time: 2020-12-16 23:42:47.350053
+duration: 0.04078
+
+id: 10
+command: command
+response: b'ok'
+start time: 2020-12-16 23:42:48.561459
+end_time: 2020-12-16 23:42:48.689139
+duration: 0.12768
+
+id: 11
+command: takeoff
+response: b'ok'
+start time: 2020-12-16 23:42:50.896551
+end_time: 2020-12-16 23:42:59.113108
+duration: 8.216557
+
+id: 12
+command: up 170
+response: b'ok'
+start time: 2020-12-16 23:42:59.165161
+end_time: 2020-12-16 23:43:02.450714
+duration: 3.285553
+

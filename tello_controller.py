@@ -138,7 +138,7 @@ class Tell_Controller:
                     Queue.put('sn?')
                 while not self.all_queue_empty(self.execution_pools):
                     time.sleep(0.5)
-                time.sleep(1)
+                #time.sleep(1)
                 while not self.all_got_response(self.manager):
                     time.sleep(0.5)
                 for tello_log in self.manager.get_log().values():
@@ -184,15 +184,33 @@ class Tell_Controller:
                     for Queue in self.execution_pools:
                         Queue.put('command')
                         time.sleep(1)'''
+                id_list = []
+                _id = _command.partition('wait')[0]
+                if _id == '*':
+                    for x in range(len(self.tello_list)):
+                        id_list.append(x + 1)
+                else:
+                    # index starbattery_checkt from 1
+                    id_list.append(int(_id))
+                # rint(id_list)
+                action = 'command'
                 while True:
                     cnt = wait_time - 5
                     if cnt > 0:
-                        for Queue in self.execution_pools:
-                            Queue.put('command')
+                        for tello_id in id_list:
+                            # rint(tello_id)
+                            tmp_sn = self.id_sn_dict[tello_id]
+                            reflec_ip = self.sn_ip_dict[tmp_sn]
+                            fid = self.ip_fid_dict[reflec_ip]
+                            self.execution_pools[fid].put(action)
                             time.sleep(5)
                     else:
-                        for Queue in self.execution_pools:
-                            Queue.put('command')
+                        for tello_id in id_list:
+                            # rint(tello_id)
+                            tmp_sn = self.id_sn_dict[tello_id]
+                            reflec_ip = self.sn_ip_dict[tmp_sn]
+                            fid = self.ip_fid_dict[reflec_ip]
+                            self.execution_pools[fid].put(action)
                             time.sleep(wait_time)
                         break
                     wait_time = cnt
