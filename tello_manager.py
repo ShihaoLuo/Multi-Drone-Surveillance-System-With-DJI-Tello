@@ -44,7 +44,7 @@ class Tello_Manager:
         self.tello_ip_list = []
         self.tello_list = []
         self.log = defaultdict(list)
-        self.COMMAND_TIME_OUT = 5.0
+        self.COMMAND_TIME_OUT = 3.0
         self.last_response_index = {}
         self.str_cmd_index = {}
         self.response = None
@@ -205,7 +205,6 @@ class Tello_Manager:
         while not self.log[ip][-1].got_response():
             now = time.time()
             diff = now - start
-            print('diff:', diff)
             if diff > self.COMMAND_TIME_OUT:
                 print ('[Not_Get_Response]Max timeout exceeded...command: %s \n' % real_command)
                 start = time.time()

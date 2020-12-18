@@ -92,8 +92,7 @@ path1 = [[-350, 0, 100, 0],
         [-550, 100, 100, 270],
         [-550, 0, 100, 270],
         [-550, 0, 100, 0],
-        [-450, 0, 100, 0],
-        [-350, 0, 100, 0]]
+        [-450, 0, 100, 0]]
 path2 = [[-350, 0, 100, 0],
          [-250, 0, 100, 0],
         [-250, 0, 100, 90],
@@ -115,24 +114,64 @@ path2 = [[-350, 0, 100, 0],
         [-550, 100, 100, 270],
         [-550, 0, 100, 270],
         [-550, 0, 100, 0],
-        [-450, 0, 100, 0],
-        [-350, 0, 100, 0]]
+        [-450, 0, 100, 0]]
+path3 = [[-350, 0, 100, 0],
+         [-250, 0, 100, 0],
+        [-250, 0, 100, 90],
+        [-250, 100, 100, 90],
+        [-250, 200, 100, 90],
+        [-250, 300, 100, 90],
+        [-250, 400, 100, 90],
+        [-250, 500, 100, 90],
+        [-250, 600, 100, 90],
+        [-250, 600, 100, 180],
+        [-350, 600, 100, 180],
+        [-450, 600, 100, 180],
+        [-550, 600, 100, 180],
+        [-550, 600, 100, 270],
+        [-550, 500, 100, 270],
+        [-550, 400, 100, 270],
+        [-550, 300, 100, 270],
+        [-550, 200, 100, 270],
+        [-550, 100, 100, 270],
+        [-550, 0, 100, 270],
+        [-550, 0, 100, 0],
+        [-450, 0, 100, 0]]
+num = 2
 
 try:
-    controller.scan(2)
+    controller.scan(num)
     video = tello_video.Tello_Video(controller.tello_list)
     controller.command("battery_check 20")
     controller.command("correct_ip")
     for i in range(len(controller.sn_list)):
         controller.command(str(i + 1) + "=" + controller.sn_list[i])
     Scheduler = Scheduler.Scheduler(controller, video)
-    for i in range(2):
-        Scheduler.init_path(2, i+1, eval('path'+str(i+1)), [-450, 0, 0, 0])
+    for i in range(num):
+        Scheduler.init_path(i+1, eval('path'+str(i+1)), [-450, 0, 0, 0])
     #Scheduler.init_path(1, 2, path2, [-450, 0, 0, 0])
-    Scheduler.drone_init()
+    #Scheduler.drone_init()
     #controller.command("1>takeoff")
     #controller.command('1>up 170')
     Scheduler.start()
+    print('after thread start_______________________')
+    now = time.time()
+    now_run = {}
+    for i in range(num):
+        now_run[i] = now + i * 5
+    while True:
+        # print('schedule thread living...', Scheduler.get_schedule_handle().isAlive())
+        # for i in range(len(controller.sn_list)):
+        #     print('run thread living...', i+1, Scheduler.get_runthread_handle()[i+1].isAlive())
+        for i in range(num):
+            if time.time() - now_run[i] > 15:
+                Scheduler.update_path(i + 1, eval('path' + str(i + 1)))
+                now_run[i] = time.time()
+        if time.time() - now > 200:
+            print('main thread break')
+            break
+        time.sleep(0.5)
+    Scheduler.stop_thread()
     # for i in range(1):
     #     controller.command('1>battery?')
     #     for target in path:

@@ -3,7 +3,7 @@ import cv2 as cv
 import json
 import os
 import matplotlib.pyplot as plt
-import multiprocessing
+#import multiprocessing
 import scipy.linalg as linalg
 import math
 
@@ -21,8 +21,8 @@ class PoseEstimater():
             self.detecter = cv.xfeatures2d.SURF_create(hessianThreshold=100, nOctaves=10, nOctaveLayers=2, extended=1, upright=0)
         elif _algorithm == 'SIFT':
             self.detecter = cv.xfeatures2d.SIFT_create(nfeatures=0, nOctaveLayers=3, contrastThreshold=0.05, edgeThreshold=10, sigma=0.8)
-        self.queue = multiprocessing.Queue()
-        self.show_match = multiprocessing.Process(target=self.show_match)
+        #self.queue = multiprocessing.Queue()
+        #self.show_match = multiprocessing.Process(target=self.show_match)
 
 
     def loaddata(self, _dataset_path):
