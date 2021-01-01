@@ -1,0 +1,38 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: b'ok'
+start time: 2021-01-01 14:46:29.557838
+end_time: 2021-01-01 14:46:30.134980
+duration: 0.577142
+
+id: 1
+command: battery?
+response: b'49\r\n'
+start time: 2021-01-01 14:46:31.667862
+end_time: 2021-01-01 14:46:31.734187
+duration: 0.066325
+
+id: 2
+command: sn?
+response: b'0TQDG43EDB8YQ9'
+start time: 2021-01-01 14:46:34.236072
+end_time: 2021-01-01 14:46:34.283939
+duration: 0.047867
+
+id: 3
+command: command
+response: b'ok'
+start time: 2021-01-01 14:46:37.021179
+end_time: 2021-01-01 14:46:37.088914
+duration: 0.067735
+
+id: 4
+command: takeoff
+response: None
+start time: 2021-01-01 14:46:38.668956
+end_time: None
+duration: None
+

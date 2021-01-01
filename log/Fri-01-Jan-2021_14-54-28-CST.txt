@@ -1,0 +1,108 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: b'ok'
+start time: 2021-01-01 14:54:28.999511
+end_time: 2021-01-01 14:54:29.572956
+duration: 0.573445
+
+id: 1
+command: battery?
+response: b'38\r\n'
+start time: 2021-01-01 14:54:31.103942
+end_time: 2021-01-01 14:54:31.150365
+duration: 0.046423
+
+id: 2
+command: sn?
+response: b'0TQDG43EDB8YQ9'
+start time: 2021-01-01 14:54:33.646426
+end_time: 2021-01-01 14:54:33.708206
+duration: 0.06178
+
+id: 3
+command: command
+response: b'ok'
+start time: 2021-01-01 14:54:36.441946
+end_time: 2021-01-01 14:54:36.461832
+duration: 0.019886
+
+id: 4
+command: takeoff
+response: b'ok'
+start time: 2021-01-01 14:54:38.094576
+end_time: 2021-01-01 14:54:39.110848
+duration: 1.016272
+
+id: 5
+command: up 170
+response: b'error Not joystick'
+start time: 2021-01-01 14:54:39.136506
+end_time: 2021-01-01 14:54:39.725823
+duration: 0.589317
+
+id: 6
+command: streamon
+response: b'ok'
+start time: 2021-01-01 14:54:40.173297
+end_time: 2021-01-01 14:54:40.230879
+duration: 0.057582
+
+id: 7
+command: go 50 -33 -2 100
+response: b'error Not joystick'
+start time: 2021-01-01 14:54:41.573780
+end_time: 2021-01-01 14:54:42.226303
+duration: 0.652523
+
+id: 8
+command: go 100 3 0 100
+response: b'error Not joystick'
+start time: 2021-01-01 14:54:42.743361
+end_time: 2021-01-01 14:54:43.399477
+duration: 0.656116
+
+id: 9
+command: ccw 92.0
+response: b'error Not joystick'
+start time: 2021-01-01 14:54:43.918173
+end_time: 2021-01-01 14:54:44.471288
+duration: 0.553115
+
+id: 10
+command: go 99 0 0 100
+response: b'error Not joystick'
+start time: 2021-01-01 14:54:45.122618
+end_time: 2021-01-01 14:54:45.747417
+duration: 0.624799
+
+id: 11
+command: go 100 0 0 100
+response: b'ok'
+start time: 2021-01-01 14:54:46.305047
+end_time: 2021-01-01 14:54:49.102665
+duration: 2.797618
+
+id: 12
+command: streamoff
+response: b'ok'
+start time: 2021-01-01 14:54:49.250254
+end_time: 2021-01-01 14:54:49.316694
+duration: 0.06644
+
+id: 13
+command: go 100 0 0 100
+response: b'ok'
+start time: 2021-01-01 14:54:50.312505
+end_time: 2021-01-01 14:54:53.493724
+duration: 3.181219
+
+id: 14
+command: go 100 0 0 100
+response: b'ok'
+start time: 2021-01-01 14:54:53.694012
+end_time: 2021-01-01 14:54:56.191599
+duration: 2.497587
+

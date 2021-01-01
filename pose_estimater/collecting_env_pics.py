@@ -17,7 +17,7 @@ controller.command("battery_check 20")
 controller.command("correct_ip")
 video = tello_video.Tello_Video(controller.tello_list)
 
-name = 'post'
+name = 'post1'
 num = 6
 
 pic_folder = './dataset/'+name
@@ -39,7 +39,7 @@ try:
     for i in range(num):
         controller.command('*>'+move_command[i%6])
         video.take_pic(pic_folder + name + str(i) + '.jpg')
-        controller.command('wait 1')
+        controller.command('*wait 1')
     controller.command('*>land')
     controller.save_log(controller.manager)
     controller.manager.close()

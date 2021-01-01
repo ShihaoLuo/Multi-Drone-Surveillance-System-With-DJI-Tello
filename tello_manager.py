@@ -3,15 +3,12 @@ import socket
 import time
 import netifaces
 import netaddr
-#from netaddr import IPNetwork
 from collections import defaultdict
 from stats import Stats
 import inspect
 import ctypes
-import queue
 
 
-# import binascii
 class Tello:
     """
     A wrapper class to interact with Tello
