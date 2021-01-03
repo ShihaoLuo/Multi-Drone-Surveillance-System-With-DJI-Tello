@@ -38,7 +38,9 @@ class TelloNode:
 
     def get_thread_flag(self):
         if self.run_thread_flag.empty() is False:
-            return self.run_thread_flag.get()
+            tmp = self.run_thread_flag.get()
+            self.run_thread_flag.put(tmp)
+            return tmp
         return None
 
     def init_path(self, path, pose):
@@ -127,9 +129,9 @@ class TelloNode:
 
     def run_thread(self):
         print('run thread start....')
-        video_thread = multiprocessing.Process(target=self._receive_video_thread)
+        video_thread = multiprocessing.Process(target=self._receive_video_thread, daemon=True)
         video_thread.start()
-        cmd_thread = multiprocessing.Process(target=self.update_cmd)
+        cmd_thread = multiprocessing.Process(target=self.update_cmd, daemon=True)
         cmd_thread.start()
         self.cmd.put('>command')
         while True:
@@ -327,7 +329,7 @@ class TelloNode:
         self.cmd_res.get()
         self.send_command(">land")
         while self.cmd_res.empty is True:
-            time.sleep(0.1)
+            time.sleep(1)
         self.cmd_res.get()
         self.send_command(">streamoff")
         print('run dying...', self.tello_ip)
