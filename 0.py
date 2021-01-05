@@ -24,8 +24,8 @@ def received_ok():
             if response.decode(encoding='utf-8', errors='ignore').upper() == 'OK':
                 cmd_res.put(ip)
             time.sleep(0.00)
-        except socket.error as exc:
-            print("[Exception_Error(rev)]Caught exception socket.error : %s\n" % exc)
+        except KeyboardInterrupt as e:
+            break
 
 
 path1 = [[-350, 0, 100, 0],
@@ -60,12 +60,13 @@ stop_flag = multiprocessing.Queue()
 scanner = Scanner()
 scanner.find_available_tello(num)
 tello_list = scanner.get_tello_info()
-rec_thread = multiprocessing.Process(target=received_ok)
+rec_thread = multiprocessing.Process(target=received_ok, daemon=True)
 rec_thread.start()
 for i in range(num):
     Node[tello_list[i][0]] = TelloNode(tello_list[i])
     Node[tello_list[i][0]].init_path(path1, [-450, 0, 0, 0])
     Node[tello_list[i][0]].run()
+old = time.time()
 try:
     while True:
         if cmd_res.empty() is False:
@@ -81,6 +82,10 @@ try:
             stop_flag.put(1)
             time.sleep(1)
             break
+        if time.time() - old >= 5:
+            for i in range(len(tello_list)):
+                Node[tello_list[i][0]].update_path(path1)
+            old = time.time()
 except KeyboardInterrupt as e:
     for i in range(len(tello_list)):
         Node[tello_list[i][0]].send_command('>streamoff')

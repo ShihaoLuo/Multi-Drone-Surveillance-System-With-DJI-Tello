@@ -8,6 +8,8 @@
 import socket
 import time
 import threading
+import inspect
+import ctypes
 
 
 class Scanner:
@@ -51,6 +53,7 @@ class Scanner:
                     continue
                 self.socket.sendto('command'.encode('utf-8'), (ip, 8889))
             time.sleep(0.1)
+        self.stop_thread(self.receive_thread)
         self.socket.close()
 
     def _receive_thread(self):
@@ -83,6 +86,24 @@ class Scanner:
                             pass
             except socket.error as exc:
                 print("[Exception_Error(rev)]Caught exception socket.error : %s\n" % exc)
+                break
 
     def get_tello_info(self):
         return self.tello_info
+
+    def _async_raise(self, tid, exctype):
+        """raises the exception, performs cleanup if needed"""
+        tid = ctypes.c_long(tid)
+        if not inspect.isclass(exctype):
+            exctype = type(exctype)
+        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, ctypes.py_object(exctype))
+        if res == 0:
+            raise ValueError("invalid thread id")
+        elif res != 1:
+            # """if it returns a number greater than one, you're in trouble,
+            # and you should call it again with exc=NULL to revert the effect"""
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
+            raise SystemError("PyThreadState_SetAsyncExc failed")
+
+    def stop_thread(self, thread):
+        self._async_raise(thread.ident, SystemExit)

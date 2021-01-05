@@ -172,7 +172,7 @@ class PoseEstimater():
             if RR is True and len(inliers)>=7:
                 rotM = np.array(cv.Rodrigues(rvec)[0])
                 R = rotM
-                print(R)
+                # print(R)
                 sy = math.sqrt(R[0, 0] * R[0, 0] + R[0, 1] * R[0, 1])
                 singular = sy < 1e-6
                 if not singular:

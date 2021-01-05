@@ -32,9 +32,10 @@ class TelloNode:
         self.pose_estimater.loaddata('pose_estimater/dataset/')
         self.path = multiprocessing.Queue()
         self.video_flag = 1
-        self.path_lock = multiprocessing.Lock()
+        self.path_lock = multiprocessing.RLock()
         self.cmd = multiprocessing.Queue()
         self.run_thread_flag = multiprocessing.Queue()
+        self.update_path_flag = multiprocessing.Queue()
 
     def get_thread_flag(self):
         if self.run_thread_flag.empty() is False:
@@ -50,26 +51,36 @@ class TelloNode:
         self.pose.put(pose)
 
     def update_path(self, path):
-        print('waiting for updating the path______________________________________', self.tello_ip)
-        self.path_lock.acquire()
-        print('updating the path______________________________________', self.tello_ip)
-        tmp = np.array(path)
-        d = np.array([])
-        pose = self.pose.get()
-        self.pose.put(pose)
-        for t in tmp:
-            d = np.append(d, np.linalg.norm(np.array(pose[0:3]) - t[0:3], 2))
-        a = np.argmin(d)
-        while self.path.empty() is False:
-            self.path.get()
-        if a == len(tmp)-1:
+        update_path_thread = multiprocessing.Process(target=self._update_path, args=(path,))
+        update_path_thread.start()
+
+    def _update_path(self, path):
+        if self.update_path_flag.empty() is True:
+            self.update_path_flag.put(1)
+            old = time.time()
+            self.path_lock.acquire()
+            print('path lock acquired by u path')
+            print('updating the path______________________________________', self.tello_ip)
+            tmp = np.array(path)
+            d = np.array([])
+            pose = self.pose.get()
+            self.pose.put(pose)
             for t in tmp:
-                self.path.put(t)
-        else:
-            for t in tmp[a+1:]:
-                self.path.put(t)
-        self.path_lock.release()
-        print('finished updating the path_________________________________', self.tello_ip)
+                d = np.append(d, np.linalg.norm(np.array(pose[0:3]) - t[0:3], 2))
+            a = np.argmin(d)
+            while self.path.empty() is False:
+                self.path.get()
+            if a == len(tmp)-1:
+                for t in tmp:
+                    self.path.put(t)
+            else:
+                for t in tmp[a + 1:]:
+                    self.path.put(t)
+            self.path_lock.release()
+            print('path lock released by u path')
+            print('finished updating the path_________________________________', self.tello_ip)
+            print('update path need {}'.format(time.time()-old))
+            self.update_path_flag.get()
 
     def _h264_decode(self, packet_data):
         frames = self.h264decoder.decode(packet_data)
@@ -95,7 +106,7 @@ class TelloNode:
                     pack_data = ''
                 if self.run_thread_flag.empty() is False:
                     time.sleep(1)
-                    self.video_socket.close()
+                    # self.video_socket.close()
                     print('video thread die..')
                     break
             except socket.error as exc:
@@ -244,6 +255,7 @@ class TelloNode:
                 pose = self.pose.get()
                 self.pose.put(pose)
                 self.path_lock.acquire()
+                print('path lock acquired by cmd')
                 if self.path.empty() is True:
                     print('in run thread, path queue is empty, wait for path updating..', self.tello_ip)
                     while self.cmd_res.empty is True:
@@ -321,6 +333,7 @@ class TelloNode:
                     self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
                     # self.send_command('>' + cmd)
                 self.path_lock.release()
+                print('path lock released by cmd')
                 time.sleep(0.1)
             except KeyboardInterrupt as e:
                 break
