@@ -13,7 +13,7 @@ from pose_estimater.pose_estimater import *
 
 
 class TelloNode:
-    def __init__(self, tello_info, res_flag, main_flag):
+    def __init__(self, tello_info, res_flag, main_flag, p_flag):
         self.tello_ip = tello_info[0]
         self.ctr_port = tello_info[1]
         self.video_port = tello_info[2]
@@ -33,11 +33,22 @@ class TelloNode:
         self.video_flag = 1
         self.run_thread_flag = multiprocessing.Value('i', 0)
         self.update_path_flag = multiprocessing.Value('i', 0)
-        self.Res_flag = res_flag[self.tello_ip]
+        self.Res_flag = res_flag
         self.cmd = multiprocessing.Array('c', 20)
         self.cmd_event = multiprocessing.Event()
         self.update_path_event = multiprocessing.Event()
         self.main_flag = main_flag
+        self.permission_flag = p_flag
+        self.target = multiprocessing.Array('c', 20)
+
+    def get_target(self):
+        if self.target.value.decode() == '':
+            return None
+        else:
+            tmp = self.target.value
+            tmp = tmp.decode().split(',')
+            tmp = list(map(int, tmp))
+            return tmp
 
     def get_thread_flag(self):
         return self.run_thread_flag
@@ -47,6 +58,7 @@ class TelloNode:
         for t in tmp:
             self.path.put(t)
         self.pose.put(pose)
+        self.target.value = b'450,0,-150,0'
 
     def update_path(self, path):
         update_path_thread = multiprocessing.Process(target=self._update_path, args=(path,))
@@ -141,9 +153,10 @@ class TelloNode:
             self.cmd.value = b'>command'
         self.cmd_event.set()
         while True:
+            # print('in run , target:', self.target.value)
             # print("video thread is alive,", video_thread.is_alive())
             # print("cmd thread is alive,", cmd_thread.is_alive())
-            self.cmd_event.wait(5)
+            self.cmd_event.wait()
             if self.run_thread_flag.value == 1 or self.main_flag.value == 1:
                 time.sleep(1)
                 break
@@ -225,6 +238,12 @@ class TelloNode:
         pose = self.pose.get()
         self.pose.put(pose)
         if pose[2] == 0:
+            self.target.value = b'450,0,-70,0'
+            time.sleep(0.1)
+            while self.permission_flag.value == 0:
+                # print('wait for permission of ', self.tello_ip, self.permission_flag.value)
+                time.sleep(0.2)
+            self.permission_flag.value = 0
             while self.Res_flag.value == 0:
                 time.sleep(0.1)
             with self.Res_flag.get_lock():
@@ -235,6 +254,12 @@ class TelloNode:
             print('update cmd, >takeoff')
             time.sleep(0.1)
             self.pose.put(self.update_pos('>takeoff', self.pose.get()))
+            self.target.value = b'450,0,100,0'
+            time.sleep(0.1)
+            while self.permission_flag.value == 0:
+                print('wait for permission 1.5,', self.permission_flag.value)
+                time.sleep(0.2)
+            self.permission_flag.value = 0
             while self.Res_flag.value == 0:
                 time.sleep(0.1)
             with self.Res_flag.get_lock():
@@ -258,6 +283,7 @@ class TelloNode:
             self.pose.put(self.update_pos('>streamon', self.pose.get()))
         while True:
             # print('in update cmd, main alg {}'.format(self.main_flag.value))
+            # print('in update cmd, permission {}'.format(self.permission_flag.value))
             self.update_path_event.wait()
             pose = self.pose.get()
             self.pose.put(pose)
@@ -279,6 +305,7 @@ class TelloNode:
                     break
             self.update_path_event.wait()
             target = self.path.get()
+            self.target.value = ','.join(map(str, target)).encode()
             if self.video_flag == 0 and pose[1] < 100:
                 if self.main_flag.value == 1:
                     while self.path.empty() is False:
@@ -316,8 +343,11 @@ class TelloNode:
             print("--------------------------")
             print("target:{}".format(target))
             self.update_path_event.wait()
-            old = time.time()
-            self.update_path_event.wait()
+            time.sleep(0.1)
+            while self.permission_flag.value == 0:
+                print('wait for permission, 2', self.permission_flag.value)
+                time.sleep(0.2)
+            self.permission_flag.value = 0
             if np.linalg.norm(target[0:3] - pose[0:3]) < 50:
                 pass
             else:
