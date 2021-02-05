@@ -17,7 +17,7 @@ controller.command("battery_check 20")
 controller.command("correct_ip")
 video = tello_video.Tello_Video(controller.tello_list)
 
-name = 'post1'
+name = 'table_test'
 num = 6
 
 pic_folder = './dataset/'+name
@@ -28,8 +28,8 @@ if not os.path.exists(pic_folder):
     os.mkdir(pic_folder)
 
 
-init_command = ['setfps high', 'setresolution high', 'setbitrate 5', 'streamon', 'takeoff', 'up 170']
-move_command = ['forward 60', 'right 100', 'left 100', 'back 60', 'right 100', 'left 100']
+init_command = ['setfps high', 'setresolution high', 'setbitrate 5', 'streamon', 'downvision 1', 'takeoff', 'up 100']
+move_command = ['forward 20', 'right 20', 'left 20', 'back 40', 'right 20', 'left 20']
 
 try:
     for i in range(len(controller.sn_list)):

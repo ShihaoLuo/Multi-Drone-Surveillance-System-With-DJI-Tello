@@ -8,7 +8,7 @@ import scipy.linalg as linalg
 import math
 
 class PoseEstimater():
-    def __init__(self, _algorithm='SIFT', min_match=30):
+    def __init__(self, _algorithm='SIFT', min_match=25):
         self.camera_matrix = None
         self.distor_matrix = None
         self.min_match = min_match
@@ -17,6 +17,9 @@ class PoseEstimater():
         self.dataset = {}
         self.showmatchflag = 0
         self.transformpxel = None
+        self.showmatchflag = 0
+        self.img_query = {}
+        self.match_img = None
         if _algorithm == 'SURF':
             self.detecter = cv.xfeatures2d.SURF_create(hessianThreshold=100, nOctaves=10, nOctaveLayers=2, extended=1, upright=0)
         elif _algorithm == 'SIFT':
@@ -41,6 +44,7 @@ class PoseEstimater():
                 _dataset['wpixel'] = wpxl
                 _dataset['wpoint'] = wpt
                 self.dataset[dir] = _dataset
+                self.img_query[dir] = cv.imread(_dataset_path+dir+'/images/'+dir+'.jpg')
 
     def read_from_jason(self, _file):
         result = []
@@ -103,7 +107,7 @@ class PoseEstimater():
             kp_good_match_query = []
             des_good_match_query = []
             for m, n in matches:
-                if m.distance < 0.54 * n.distance:
+                if m.distance < 0.56 * n.distance:
                     good.append(m)
                     '''print('--------------------\n')
                     print('m.imgIdx: {}\n'.format(m.imgIdx))
@@ -113,23 +117,23 @@ class PoseEstimater():
                     print('kp_test: {}\n'.format(kp_test[m.trainIdx].pt))'''
                     kp_good_match_query.append(kp_query[m.queryIdx])
                     des_good_match_query.append(des_query[m.queryIdx])
-            '''print('the num of finding featurs of query is {}\n'.format(len(des_query)))
-            print('the num of finding featurs of test is {}\n'.format(len(des_test)))
-            print('the num of finding matches is {}\n'.format(len(matches)))'''
-            #print("good mathch: {}".format(len(good)))
+            # print('the num of finding featurs of query is {}\n'.format(len(des_query)))
+            # print('the num of finding featurs of test is {}\n'.format(len(des_test)))
+            # print('the num of finding matches is {}\n'.format(len(matches)))
+            print("good mathch of {}: {}".format(obj, len(good)))
             if len(good) > self.min_match:
                 src_pts = np.float32([kp_good_match_query[i].pt for i in range(len(kp_good_match_query))]).reshape(-1, 1, 2)
                 dst_pts = np.float32([kp_test[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
                 M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
                 matchesMask = mask.ravel().tolist()
                 if M is not None and mask is not None:
-                    #h, w = img_query.shape
-                    d = 1
-                    #pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-                    #dst = cv.perspectiveTransform(pts, M)
                     pxel = self.dataset[obj]['wpixel'].reshape(-1, 1, 2)
                     pxel = cv.perspectiveTransform(pxel, M)
-                    '''if self.showmatchflag == 1:
+                    if self.showmatchflag == 1:
+                        img_query = self.img_query[obj]
+                        h, w = img_query.shape[0:2]
+                        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+                        dst = cv.perspectiveTransform(pts, M)
                         #print('sss {}'.format(wpxel))
                         img_test = cv.polylines(img_test, [np.int32(dst)], True, 255, 1, cv.LINE_AA)
                         draw_params = dict(matchColor=(0, 255, 0),
@@ -140,67 +144,124 @@ class PoseEstimater():
                         tmppoint = pxel.reshape(-1, 1)
                         point = []
                         for i in range(0, len(tmppoint), 2):
-                            point.append((int(tmppoint[i]+_img_query.shape[1]), int(tmppoint[i + 1])))
+                            point.append((int(tmppoint[i]+img_query.shape[1]), int(tmppoint[i + 1])))
                         img = mimg
                         for p in point:
                             img = cv.circle(img, p, 4, (255, 0, 0), -1)
-                        self.queue.put(img)'''
+                        # self.queue.put(img)
+                        # plt.imshow(img)
+                        # plt.show()
+                        # cv.imwrite(str(self.index)+'.jpg', img)
+                        self.match_img = img
                     return obj, pxel
         return None, None
 
     def estimate_pose(self, _img):
         obj, _wpxel = self.pic_match(_img)
         if obj is not None and _wpxel is not None:
-            wpt = self.dataset[obj]['wpoint'].reshape(-1, 1, 3)
-            _wpxel = _wpxel.reshape(-1, 1, 2)
-            self.transformpxel = _wpxel
-            #wpxel = self.dataset[obj]['wpixel'].reshape(-1, 1, 2)
-            #print(self.camera_matrix)
-            #print(self.distor_matrix)
-            #print('transformed wpxl: \n{}'.format(_wpxel))
-            pnppara = dict(objectPoints=wpt,
-                           imagePoints=_wpxel,
-                           cameraMatrix=self.camera_matrix,
-                           distCoeffs=self.distor_matrix,
-                           useExtrinsicGuess=0,
-                           flags=cv.SOLVEPNP_ITERATIVE)
-            RR, rvec, tvec, inliers = cv.solvePnPRansac(**pnppara)
-            #print(rvec)
-            #print(RR)
-            # print('inliers:{}'.format(inliers))
-            #print('tvec/n{}'.format(tvec/2))
-            if RR is True and len(inliers) >= 6:
-                rotM = np.array(cv.Rodrigues(rvec)[0])
-                R = rotM
-                # print(R)
-                sy = math.sqrt(R[0, 0] * R[0, 0] + R[0, 1] * R[0, 1])
-                singular = sy < 1e-6
-                if not singular:
-                    x = math.atan2(R[1, 2], R[2, 2])
-                    y = math.atan2(-R[0, 2], sy)
-                    z = math.atan2(math.sin(x)*R[2, 0]-math.cos(x)*R[1, 0], math.cos(x)*R[1, 1]-math.sin(x)*R[2, 1])
-                else:
-                    x = math.atan2(-R[1, 2], R[1, 1])
-                    y = math.atan2(-R[2, 0], sy)
-                    z = 0
-                # print('dst:', R)
-                # print('x: {}\ny: {}\nz: {}'.format(x, y, z))
-                # print('rvec:{}\n'.format(rvec))
-                # print('tvec:{}\n'.format(tvec))
-                #rotM = np.array(cv.Rodrigues(rvec)[0])
-                # print('rotM {}\n)'.format(rotM))
-                # print(-np.linalg.inv(rotM))
-                pose = np.dot(np.linalg.inv(-rotM), tvec)
-                #print(inliers)
-                return pose, z *180/3.1416 +90
+            wpt = self.dataset[obj]['wpoint'].reshape(-1, 3)
+            _wpxel = _wpxel.reshape(-1, 2)
+            self.transformpxel = _wpxel.copy()
+            # print(_wpxel, wpt)
+            _wpxel[:, 0] = (_wpxel[:, 0]-self.camera_matrix[0, 2])*9.2547 / 10
+            _wpxel[:, 1] = (_wpxel[:, 1] - self.camera_matrix[1, 2]) * 9.2547 / 10
+            # print(_wpxel, wpt)
+            # a = math.atan2(v[1], v[0]) / math.pi * 180
+            # cross = np.cross(-_wpxel[0], v)
+            # d = cross/np.linalg.norm(v, 2)
+            # print(cross, d)
+            _wpxel = np.c_[_wpxel, [[0],[0]]]
+            # print(_wpxel)
+            r = np.array([[-1,0,0],[0,1,0],[0,0,-1]])
+            _wpxel_w = np.array([])
+            _wpxel_w = np.dot(r, _wpxel[0])
+            _wpxel_w = np.vstack((_wpxel_w, np.dot(r, _wpxel[1])))
+            if wpt[0][1] > wpt[1][1]:
+                head = _wpxel_w[0]
+                tail = _wpxel_w[1]
+                head_w = wpt[0]
+                tail_w = wpt[1]
             else:
-                return None, None
+                head = _wpxel_w[1]
+                tail = _wpxel_w[0]
+                head_w = wpt[1]
+                tail_w = wpt[0]
+            v = head - tail
+            # print('tial_w', tail_w)
+            # print(v, _wpxel_w)
+            a = math.atan2(v[1], v[0]) / math.pi * 180
+            # print(a)
+            cross = np.cross(-tail, v)
+            d = cross/np.linalg.norm(v, 2)
+            # print(d)
+            # theta = math.atan2(v[1], v[0]) - math.atan2(-tail[1], -tail[0]) / math.pi * 180
+            # print(theta)
+            pose_y = tail_w[1] - d[2]
+            v_y = np.dot(np.array([[0,-1,0],[1,0,0],[0,0,1]]), v)
+            # print(v_y)
+            cross = np.cross(-tail, v_y)
+            d = cross / np.linalg.norm(v_y, 2)
+            # print(d)
+            pose_x = tail_w[0] + d[2]
+            # print(self.camera_matrix)
+          # print(self.transformpxel)
+            pose_z = self.camera_matrix[0][0] * np.linalg.norm(head_w - tail_w, 2)/np.linalg.norm(self.transformpxel[0]-self.transformpxel[1]) + tail_w[2]
+            # print(pose_z)
+            pose = np.array([pose_x, pose_y,pose_z])
+            print('a:{}'.format(a))
+            cv.imwrite('/home/jakeluo/tello_project/log/match_img/'+str(pose_x)+'-'+str(pose_y)+'-'+str(pose_z)+'-'+str(a)+'.jpg', self.match_img)
+            return pose, -a
+            # # print('pose: {},{}'.format(pose_x, pose_y))
+            # wpt = self.dataset[obj]['wpoint'].reshape(-1, 1, 3)
+            # _wpxel = _wpxel.reshape(-1, 1, 2)
+            # self.transformpxel = _wpxel
+            # #wpxel = self.dataset[obj]['wpixel'].reshape(-1, 1, 2)
+            # #print(self.camera_matrix)
+            # #print(self.distor_matrix)
+            # #print('transformed wpxl: \n{}'.format(_wpxel))
+            # pnppara = dict(objectPoints=wpt,
+            #                imagePoints=_wpxel,
+            #                cameraMatrix=self.camera_matrix,
+            #                distCoeffs=self.distor_matrix,
+            #                useExtrinsicGuess=0,
+            #                flags=cv.SOLVEPNP_ITERATIVE)
+            # RR, rvec, tvec, inliers = cv.solvePnPRansac(**pnppara)
+            # #print(rvec)
+            # #print(RR)
+            # print('inliers:{}'.format(inliers))
+            # #print('tvec/n{}'.format(tvec/2))
+            # if RR is True and len(inliers) >= 6:
+            #     rotM = np.array(cv.Rodrigues(rvec)[0])
+            #     R = rotM
+            #     # print(R)
+            #     sy = math.sqrt(R[0, 0] * R[0, 0] + R[0, 1] * R[0, 1])
+            #     singular = sy < 1e-6
+            #     if not singular:
+            #         x = math.atan2(R[1, 2], R[2, 2])
+            #         y = math.atan2(-R[0, 2], sy)
+            #         z = math.atan2(math.sin(x)*R[2, 0]-math.cos(x)*R[1, 0], math.cos(x)*R[1, 1]-math.sin(x)*R[2, 1])
+            #     else:
+            #         x = math.atan2(-R[1, 2], R[1, 1])
+            #         y = math.atan2(-R[2, 0], sy)
+            #         z = 0
+            #     # print('dst:', R)
+            #     # print('x: {}\ny: {}\nz: {}'.format(x, y, z))
+            #     # print('rvec:{}\n'.format(rvec))
+            #     # print('tvec:{}\n'.format(tvec))
+            #     #rotM = np.array(cv.Rodrigues(rvec)[0])
+            #     # print('rotM {}\n)'.format(rotM))
+            #     # print(-np.linalg.inv(rotM))
+            #     pose = np.dot(np.linalg.inv(-rotM), tvec)
+            #     #print(inliers)
+            #     return pose, z *180/3.1416 +90
+            # else:
+            #     return None, None
         else:
             return None, None
 
     def show_match_start(self):
         self.showmatchflag = 1
-        self.show_match.start()
+        # self.show_match.start()
 
     def show_pic(self, _img):
         fig = plt.figure(figsize=(12, 10))
@@ -244,11 +305,11 @@ class PoseEstimater():
             plt.imshow(img)
             plt.show()
 
-    def modifydata(self, obj=None, pixel=True, point=True):
+    def modifydata(self, obj, pixel=True, point=True):
         self.showdataset()
         wpixel = np.array([])
         wpoint = np.array([])
-        for i in range(8):
+        for i in range(int(self.dataset[obj]['wpoint'].size/3)):
             if pixel==True:
                 wpxlx = input('input the x of No.{} wpixel:'.format(i + 1))
                 wpxly = input('input the y of No.{} wpixel:'.format(i + 1))
@@ -260,8 +321,6 @@ class PoseEstimater():
                 wptz = input('input the z of No.{} wpoint:'.format(i + 1))
                 wpt = np.array([float(wptx), float(wpty), float(wptz)])
                 wpoint = np.append(wpoint, wpt)
-        if obj==None:
-            obj = input('the object modified:')
         if pixel==True:
             self.save_2_npy('/home/jakeluo/tello_project/pose_estimater/dataset/' + obj + '/wpixel.npy', wpixel)
         if point==True:

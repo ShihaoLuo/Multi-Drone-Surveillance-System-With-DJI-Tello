@@ -11,9 +11,12 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 import json
 import multiprocessing
+# import imutils
+import numpy as np
+# import joblib
 #import set_world_point
 
-object_name = 'post1'
+object_name = 'table_test'
 
 def save_2_jason(_file, arr):
     data = {}
@@ -57,23 +60,82 @@ def get_ROI(_img):
     dst = _img[y:y + h, x:x + w]
     return dst
 
+pts = []
+
+# :mouse callback function
+def draw_roi(event, x, y, flags, param):
+    img2 = img.copy()
+    if event == cv.EVENT_LBUTTONDOWN:  # Left click, select point
+        pts.append((x, y))
+    if event == cv.EVENT_RBUTTONDOWN:  # Right click to cancel the last selected point
+        pts.pop()
+    if event == cv.EVENT_MBUTTONDOWN:  #
+        mask = np.zeros(img.shape, np.uint8)
+        points = np.array(pts, np.int32)
+        points = points.reshape((-1, 1, 2))
+        mask = cv.polylines(mask, [points], True, (255, 255, 255), 2)
+        mask2 = cv.fillPoly(mask.copy(), [points], (255, 255, 255))  # for ROI
+        mask3 = cv.fillPoly(mask.copy(), [points], (0, 255, 0))  # for displaying images on the desktop
+        show_image = cv.addWeighted(src1=img, alpha=0.8, src2=mask3, beta=0.2, gamma=0)
+        cv.imshow("mask", mask2)
+        cv.imshow("show_img", show_image)
+        ROI = cv.bitwise_and(mask2, img)
+        cv.imshow("ROI", ROI)
+        cv.imwrite('./dataset/' + object_name + '/images/' + object_name + '.jpg', ROI)
+        cv.waitKey(0)
+    if len(pts) > 0:
+        # Draw the last point in pts
+        cv.circle(img2, pts[-1], 3, (0, 0, 255), -1)
+    if len(pts) > 1:
+        #
+        for i in range(len(pts) - 1):
+            cv.circle(img2, pts[i], 5, (0, 0, 255), -1)  # x ,y is the coordinates of the mouse click place
+        cv.line(img=img2, pt1=pts[i], pt2=pts[i + 1], color=(255, 0, 0), thickness=2)
+    cv.imshow('image', img2)
+
+    # Create images and windows and bind windows to callback functions
+
+
 
 MIN_MATH_COUNT = 20
 kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
 
 img_test = cv.imread('./dataset/'+object_name+'/images/'+object_name+'5.jpg')
-img_query = cv.imread('./dataset/'+object_name+'/images/'+object_name+'2.jpg')
+img_query = cv.imread('./dataset/'+object_name+'/images/'+object_name+'0.jpg')
 #img_test = cv.filter2D(img_test, -1, kernel)
 #img_query = cv.filter2D(img_query, -1, kernel)
-img_query = get_ROI(img_query)
+#img_query = get_ROI(img_query)
 #img_test = get_ROI(img_test)
+img = img_query
+# img = imutils.resize(img, width=500)
+cv.namedWindow('image')
+cv.setMouseCallback('image', draw_roi)
+print("[INFO] Click the left button: select the point, right click: delete the last selected point, click the middle button: determine the ROI area")
+print("[INFO] Press ‘S’ to determine the selection area and save it")
+print("[INFO] Press ESC to quit")
+while True:
+    key = cv.waitKey(1) & 0xFF
+    if key == 27:
+        break
+    if key == ord("s"):
+        saved_data = {
+            "ROI": pts
+        }
+        # joblib.dump(value=saved_data, filename="config.pkl")
+        print("[INFO] ROI coordinates have been saved to local.")
+        break
+cv.destroyAllWindows()
+
+img_query = cv.imread('./dataset/'+object_name+'/images/'+object_name+'.jpg')
+img_query = get_ROI(img_query)
+cv.imwrite('./dataset/' + object_name + '/images/' + object_name + '.jpg', img_query)
 
 sift_paras = dict(nfeatures=0,
                  nOctaveLayers=3,
                  contrastThreshold=0.05,
                  edgeThreshold=10,
                  sigma=0.8)
-cv.imwrite('./dataset/'+object_name+'/images/'+object_name+'.jpg', img_query)
+
 '''surf_paras = dict(hessianThreshold=100,
                   nOctaves=10,
                   nOctaveLayers=2,
@@ -102,7 +164,7 @@ good = []
 kp_good_match_query = []
 des_good_match_query = []
 for m, n in matches:
-    if m.distance < 0.8*n.distance:
+    if m.distance < 0.56*n.distance:
         good.append(m)
         print('--------------------\n')
         print('m.imgIdx: {}\n'.format(m.imgIdx))
@@ -123,7 +185,7 @@ if len(good)>=MIN_MATH_COUNT:
     #src_pts = np.float32([kp_query_1[m.queryIdx].pt for m in good]).reshape(-1,1,2)
     dst_pts = np.float32([kp_test[m.trainIdx].pt for m in good]).reshape(-1,1,2)
 
-    M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
+    M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 2.0)
     matchesMask = mask.ravel().tolist()
     h,w = img_query.shape[0:2]
     d = 1
@@ -153,7 +215,7 @@ thread = multiprocessing.Process(target=show_pic, args=(img, img_query,))
 thread.start()
 wpixel = np.array([])
 wpoint = np.array([])
-for i in range(8):
+for i in range(2):
     wpxlx = input('input the x of No.{} wpixel:'.format(i+1))
     wpxly = input('input the y of No.{} wpixel:'.format(i+1))
     wptx = input('input the x of No.{} wpoint:'.format(i+1))

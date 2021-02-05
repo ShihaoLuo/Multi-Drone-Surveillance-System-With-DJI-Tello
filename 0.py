@@ -77,8 +77,8 @@ def scheduler(tello_node, permission_flag):
                 pass
             else:
                 permission_flag[key].value = 0
-        for key in permission_flag.keys():
-            print('key: {}, value:{}'.format(key, permission_flag[key].value))
+        # for key in permission_flag.keys():
+        #     print('key: {}, value:{}'.format(key, permission_flag[key].value))
         time.sleep(0.5)
 
 
@@ -101,25 +101,12 @@ def received_ok(kwargs):
             print('Exception occur in received_ok thread...')
 
 
-path1 = [[-350, 0, 100, 0],
-        [-250, 0, 100, 90],
-        [-250, 100, 100, 90],
-        [-250, 200, 100, 90],
-        [-250, 300, 100, 90],
-        [-250, 400, 100, 90],
-        [-250, 500, 100, 90],
-        [-250, 600, 100, 180],
-        [-350, 600, 100, 180],
-        [-450, 600, 100, 180],
-        [-550, 600, 100, 270],
-        [-550, 500, 100, 270],
-        [-550, 400, 100, 270],
-        [-550, 300, 100, 270],
-        [-550, 200, 100, 270],
-        [-550, 100, 100, 270],
-        [-550, 0, 100, 0],
-        [-450, 0, 100, 0]]
-num = 3
+path1 = [[240, 80, 230, 0],
+         [270, 80, 230, 0],
+         [240, 110, 230, 0],
+         [240, 50, 230, 0]]
+
+num = 1
 Node = {}
 Res_flag = {}
 Permission_flag = {}
@@ -135,8 +122,8 @@ rec_thread = multiprocessing.Process(target=received_ok, args=(Res_flag,), daemo
 rec_thread.start()
 for i in range(num):
     Node[tello_list[i][0]] = TelloNode(tello_list[i], Res_flag[tello_list[i][0]],
-                                       main_thread_flag, Permission_flag[tello_list[i][0]])
-    Node[tello_list[i][0]].init_path(path1, [-450, 0, 0, 0])
+                                       main_thread_flag, Permission_flag[tello_list[i][0]], 1)
+    Node[tello_list[i][0]].init_path(path1, [240, 80, 85, 0])
     Node[tello_list[i][0]].run()
 per_thread = multiprocessing.Process(target=scheduler, args=(Node, Permission_flag), daemon=True)
 per_thread.start()

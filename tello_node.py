@@ -13,7 +13,7 @@ from pose_estimater.pose_estimater import *
 
 
 class TelloNode:
-    def __init__(self, tello_info, res_flag, main_flag, p_flag):
+    def __init__(self, tello_info, res_flag, main_flag, p_flag, show_match_flag):
         self.tello_ip = tello_info[0]
         self.ctr_port = tello_info[1]
         self.video_port = tello_info[2]
@@ -27,8 +27,10 @@ class TelloNode:
         self.video_socket.bind(('', self.video_port))
         self.h264decoder = h264decoder.H264Decoder()
         self.queue = multiprocessing.Queue()
-        self.pose_estimater = PoseEstimater('SIFT', 15)
+        self.pose_estimater = PoseEstimater('SIFT', 25)
         self.pose_estimater.loaddata('pose_estimater/dataset/')
+        if show_match_flag == 1:
+            self.pose_estimater.show_match_start()
         self.path = multiprocessing.Queue()
         self.video_flag = 1
         self.run_thread_flag = multiprocessing.Value('i', 0)
@@ -41,6 +43,30 @@ class TelloNode:
         self.main_flag = main_flag
         self.permission_flag = p_flag
         self.target = multiprocessing.Array('c', 20)
+        self.init_pose = []
+        self.show_video_thread = multiprocessing.Process(target=self.show_pic)
+        self.show_video_thread.start()
+
+    def show_pic(self):
+        # frame_dict = {}.fromkeys(self.tello_ip_list,bytes())
+        print("show pic thread start.\n")
+        while True:
+            a = cv.waitKey(2)
+            if a == 113:
+                cv.destroyAllWindows()
+                break
+            '''for tello in self.tello_list:
+                flag.append(self.queue[tello.tello_ip].empty())
+            tmp = set(flag)
+            if (flag[0] == 0) and (len(tmp) == 1):
+                for tello in self.tello_list:
+                    f[tello.tello_ip] = self.queue[tello.tello_ip].get()
+                    cv2.imshow(tello.tello_ip, f[tello.tello_ip])
+            flag = []'''
+            if self.queue.qsize() > 1:
+                f = self.queue.get()
+                cv.imshow(self.tello_ip, f)
+                time.sleep(0.01)
 
     def get_target(self):
         if self.target.value.decode() == '':
@@ -59,7 +85,8 @@ class TelloNode:
         for t in tmp:
             self.path.put(t)
         self.pose.put(pose)
-        self.target.value = b'450,0,-150,0'
+        self.target.value = ','.join(map(str, pose)).encode()
+        self.init_pose = pose
 
     def update_path(self, path):
         update_path_thread = multiprocessing.Process(target=self._update_path, args=(path,))
@@ -178,6 +205,7 @@ class TelloNode:
         run_thread.start()
 
     def update_pos(self, _last_cmd, _last_pose):
+        time.sleep(2.5)
         img = None
         pose = np.array([0, 0, 0, 0])
         if self.queue.empty() is False:
@@ -186,7 +214,6 @@ class TelloNode:
             _pose, yaw = self.pose_estimater.estimate_pose(img)
             if _pose is not None:
                 print('in img1')
-                time.sleep(2.5)
                 while self.queue.empty() is True:
                     time.sleep(0.01)
                 img = self.queue.get()
@@ -195,10 +222,13 @@ class TelloNode:
                     print('in img2')
                     pose[0] = _pose[0]
                     pose[1] = _pose[1]
-                    if _pose[2] == 0:
-                        pose[2] = _last_pose[2]
-                    else:
-                        pose[2] = _pose[2]
+                    # if _pose[2] == 0:
+                    #     pose[2] = _last_pose[2]
+                    # else:
+                    #     pose[2] = _pose[2]
+                    pose[2] = _pose[2]
+                    if yaw < 0:
+                        yaw += 360
                     pose[3] = yaw
                     print('update pose of:', self.tello_ip, pose)
                     return pose
@@ -227,7 +257,7 @@ class TelloNode:
             tmp = np.append(tmp, 0)
             pose = _last_pose + tmp
         elif '>takeoff' in _last_cmd:
-            _last_pose[2] = -70
+            _last_pose[2] = 100
             pose = _last_pose
         elif '>up' in _last_cmd:
             _last_pose[2] += float(_last_cmd.partition(' ')[2])
@@ -242,8 +272,9 @@ class TelloNode:
         pose = self.pose.get()
         self.pose.put(pose)
         old_time = time.time()
-        if pose[2] == 0:
-            self.target.value = b'450,0,-70,0'
+        cmd = ''
+        if pose[2] == 85:
+            self.target.value = ','.join(map(str, self.init_pose)).encode()
             time.sleep(0.1)
             while self.permission_flag.value == 0:
                 old_time = time.time()
@@ -265,7 +296,9 @@ class TelloNode:
             print('update cmd, >takeoff')
             time.sleep(0.1)
             self.pose.put(self.update_pos('>takeoff', self.pose.get()))
-            self.target.value = b'450,0,100,0'
+            tmp = self.init_pose
+            tmp[2] = tmp[2] + 100
+            self.target.value = ','.join(map(str, tmp)).encode()
             time.sleep(0.1)
             # while self.permission_flag.value == 0:
             #     # print('wait for permission 1.5,', self.permission_flag.value)
@@ -281,23 +314,32 @@ class TelloNode:
                 time.sleep(0.1)
             with self.Res_flag.get_lock():
                 self.Res_flag.value = 0
+            self.pose.put(self.update_pos('>up 170', self.pose.get()))
             with self.cmd.get_lock():
-                self.cmd.value = b'>up 170'
+                self.cmd.value = b'>up 130'
             self.cmd_event.set()
             print('update cmd, >up 170')
             time.sleep(0.1)
-            self.pose.put(self.update_pos('>up 170', self.pose.get()))
             while self.Res_flag.value == 0:
                 time.sleep(0.1)
             with self.Res_flag.get_lock():
                 self.Res_flag.value = 0
             # self.cmd_res.get()
+            self.pose.put(self.update_pos('>streamon', self.pose.get()))
             with self.cmd.get_lock():
                 self.cmd.value = b'>streamon'
             self.cmd_event.set()
-            print('update cmd, >streamon')
+            while self.Res_flag.value == 0:
+                time.sleep(0.1)
+            with self.Res_flag.get_lock():
+                self.Res_flag.value = 0
+            # self.cmd_res.get()
+            self.pose.put(self.update_pos('>downvision 1', self.pose.get()))
+            with self.cmd.get_lock():
+                self.cmd.value = b'>downvision 1'
+            self.cmd_event.set()
+            print('update cmd, >downvision 1')
             time.sleep(0.1)
-            self.pose.put(self.update_pos('>streamon', self.pose.get()))
             self.takeoff_flag.value = 0
         while True:
             # print('in update cmd, main alg {}'.format(self.main_flag.value))
@@ -324,40 +366,40 @@ class TelloNode:
             self.update_path_event.wait()
             target = self.path.get()
             self.target.value = ','.join(map(str, target)).encode()
-            if self.video_flag == 0 and pose[1] < 100:
-                if self.main_flag.value == 1:
-                    while self.path.empty() is False:
-                        self.path.get()
-                    break
-                while self.Res_flag.value == 0:
-                    time.sleep(0.1)
-                with self.Res_flag.get_lock():
-                    self.Res_flag.value = 0
-                # self.cmd_res.get()
-                with self.cmd.get_lock():
-                    self.cmd.value = b'>streamon'
-                self.cmd_event.set()
-                print('update cmd, >streamon')
-                self.pose.put(self.update_pos('>streamon', self.pose.get()))
-                self.video_flag = 1
-            self.update_path_event.wait()
-            if self.video_flag == 1 and pose[1] >= 100:
-                if self.main_flag.value == 1:
-                    while self.path.empty() is False:
-                        self.path.get()
-                    break
-                while self.Res_flag.value == 0:
-                    time.sleep(0.1)
-                with self.Res_flag.get_lock():
-                    self.Res_flag.value = 0
-                # self.cmd_res.get()
-                with self.cmd.get_lock():
-                    self.cmd.value = b'>streamoff'
-                self.cmd_event.set()
-                print('update cmd, >streamoff')
-                self.pose.put(self.update_pos('>streamoff', self.pose.get()))
-                # self.send_command('>streamoff')
-                self.video_flag = 0
+            # if self.video_flag == 0 and pose[1] < 100:
+            #     if self.main_flag.value == 1:
+            #         while self.path.empty() is False:
+            #             self.path.get()
+            #         break
+            #     while self.Res_flag.value == 0:
+            #         time.sleep(0.1)
+            #     with self.Res_flag.get_lock():
+            #         self.Res_flag.value = 0
+            #     # self.cmd_res.get()
+            #     with self.cmd.get_lock():
+            #         self.cmd.value = b'>streamon'
+            #     self.cmd_event.set()
+            #     print('update cmd, >streamon')
+            #     self.pose.put(self.update_pos('>streamon', self.pose.get()))
+            #     self.video_flag = 1
+            # self.update_path_event.wait()
+            # if self.video_flag == 1 and pose[1] >= 100:
+            #     if self.main_flag.value == 1:
+            #         while self.path.empty() is False:
+            #             self.path.get()
+            #         break
+            #     while self.Res_flag.value == 0:
+            #         time.sleep(0.1)
+            #     with self.Res_flag.get_lock():
+            #         self.Res_flag.value = 0
+            #     # self.cmd_res.get()
+            #     with self.cmd.get_lock():
+            #         self.cmd.value = b'>streamoff'
+            #     self.cmd_event.set()
+            #     print('update cmd, >streamoff')
+            #     self.pose.put(self.update_pos('>streamoff', self.pose.get()))
+            #     # self.send_command('>streamoff')
+            #     self.video_flag = 0
             print("--------------------------")
             print("target:{}".format(target))
             self.update_path_event.wait()
@@ -373,8 +415,18 @@ class TelloNode:
                     self.cmd_event.set()
                 time.sleep(0.2)
             self.permission_flag.value = 0
-            if np.linalg.norm(target[0:3] - pose[0:3]) < 50:
-                pass
+            while self.Res_flag.value == 0:
+                time.sleep(0.1)
+            with self.Res_flag.get_lock():
+                self.Res_flag.value = 0
+            self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
+            pose = self.pose.get()
+            self.pose.put(pose)
+            if np.linalg.norm(target[0:3] - pose[0:3]) < 25:
+                cmd = 'command'
+                with self.cmd.get_lock():
+                    self.cmd.value = ('>' + cmd).encode()
+                self.cmd_event.set()
             else:
                 alpha = pose[3] * 3.1416 / 180
                 m = np.array([[np.cos(alpha), np.sin(alpha), 0],
@@ -390,51 +442,50 @@ class TelloNode:
                     while self.path.empty() is False:
                         self.path.get()
                     break
-                while self.Res_flag.value == 0:
-                    time.sleep(0.1)
-                with self.Res_flag.get_lock():
-                    self.Res_flag.value = 0
                 # self.cmd_res.get()
-                with self.cmd.get_lock():
-                    self.cmd.value = ('>' + cmd).encode()
-                self.cmd_event.set()
+                try:
+                    with self.cmd.get_lock():
+                        self.cmd.value = ('>' + cmd).encode()
+                    self.cmd_event.set()
+                except ValueError:
+                    print(cmd)
                 print('update cmd, >' + cmd)
-                self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
                 # self.send_command('>' + cmd)
             # print('path lock released by cmd')
             if self.main_flag.value == 1:
                 while self.path.empty() is False:
                     self.path.get()
                 break
+            while self.Res_flag.value == 0:
+                time.sleep(0.1)
+            with self.Res_flag.get_lock():
+                self.Res_flag.value = 0
+            self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
+            pose = self.pose.get()
+            self.pose.put(pose)
             theta = target[3] - pose[3]
-            if abs(theta) > 30:
+            if abs(theta) > 10:
                 if abs(theta) > 180:
-                    cmd = 'cw ' + str(theta + 180)
-                    while self.Res_flag.value == 0:
-                        time.sleep(0.1)
-                    with self.Res_flag.get_lock():
-                        self.Res_flag.value = 0
+                    cmd = 'cw ' + str(theta + 360)
                     # self.cmd_res.get()
                     with self.cmd.get_lock():
                         self.cmd.value = ('>' + cmd).encode()
                     self.cmd_event.set()
                     print('update cmd, >' + cmd)
-                    self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
                     # self.send_command(">" + cmd)
                     cmd = 'ccw ' + str(theta)
                 else:
                     cmd = 'ccw ' + str(theta)
-                    while self.Res_flag.value == 0:
-                        time.sleep(0.1)
-                    with self.Res_flag.get_lock():
-                        self.Res_flag.value = 0
-                    # self.cmd_res.get()
                     with self.cmd.get_lock():
                         self.cmd.value = ('>' + cmd).encode()
                     self.cmd_event.set()
                     print('update cmd, >' + cmd)
-                    self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
                     # self.send_command(">" + cmd)
+            else:
+                cmd = 'command'
+                with self.cmd.get_lock():
+                    self.cmd.value = ('>' + cmd).encode()
+                self.cmd_event.set()
             time.sleep(0.1)
         while self.Res_flag.value == 0:
             time.sleep(0.1)
