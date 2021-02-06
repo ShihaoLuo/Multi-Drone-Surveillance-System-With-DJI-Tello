@@ -16,7 +16,7 @@ import numpy as np
 # import joblib
 #import set_world_point
 
-object_name = 'table_test'
+object_name = 'table2'
 
 def save_2_jason(_file, arr):
     data = {}
@@ -104,30 +104,30 @@ img_test = cv.imread('./dataset/'+object_name+'/images/'+object_name+'5.jpg')
 img_query = cv.imread('./dataset/'+object_name+'/images/'+object_name+'0.jpg')
 #img_test = cv.filter2D(img_test, -1, kernel)
 #img_query = cv.filter2D(img_query, -1, kernel)
-#img_query = get_ROI(img_query)
-#img_test = get_ROI(img_test)
-img = img_query
-# img = imutils.resize(img, width=500)
-cv.namedWindow('image')
-cv.setMouseCallback('image', draw_roi)
-print("[INFO] Click the left button: select the point, right click: delete the last selected point, click the middle button: determine the ROI area")
-print("[INFO] Press ‘S’ to determine the selection area and save it")
-print("[INFO] Press ESC to quit")
-while True:
-    key = cv.waitKey(1) & 0xFF
-    if key == 27:
-        break
-    if key == ord("s"):
-        saved_data = {
-            "ROI": pts
-        }
-        # joblib.dump(value=saved_data, filename="config.pkl")
-        print("[INFO] ROI coordinates have been saved to local.")
-        break
-cv.destroyAllWindows()
-
-img_query = cv.imread('./dataset/'+object_name+'/images/'+object_name+'.jpg')
 img_query = get_ROI(img_query)
+#img_test = get_ROI(img_test)
+# img = img_query
+# # img = imutils.resize(img, width=500)
+# cv.namedWindow('image')
+# cv.setMouseCallback('image', draw_roi)
+# print("[INFO] Click the left button: select the point, right click: delete the last selected point, click the middle button: determine the ROI area")
+# print("[INFO] Press ‘S’ to determine the selection area and save it")
+# print("[INFO] Press ESC to quit")
+# while True:
+#     key = cv.waitKey(1) & 0xFF
+#     if key == 27:
+#         break
+#     if key == ord("s"):
+#         saved_data = {
+#             "ROI": pts
+#         }
+#         # joblib.dump(value=saved_data, filename="config.pkl")
+#         print("[INFO] ROI coordinates have been saved to local.")
+#         break
+# cv.destroyAllWindows()
+
+# img_query = cv.imread('./dataset/'+object_name+'/images/'+object_name+'.jpg')
+# img_query = get_ROI(img_query)
 cv.imwrite('./dataset/' + object_name + '/images/' + object_name + '.jpg', img_query)
 
 sift_paras = dict(nfeatures=0,

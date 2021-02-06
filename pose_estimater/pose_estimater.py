@@ -43,6 +43,7 @@ class PoseEstimater():
                 _dataset['kp'] = kp
                 _dataset['wpixel'] = wpxl
                 _dataset['wpoint'] = wpt
+                _dataset['flag_point'] = [(wpt[0]+wpt[3])/2, (wpt[1]+wpt[4])/2, (wpt[2]+wpt[5])/2]
                 self.dataset[dir] = _dataset
                 self.img_query[dir] = cv.imread(_dataset_path+dir+'/images/'+dir+'.jpg')
 
@@ -90,8 +91,10 @@ class PoseEstimater():
     def read_from_npy(self, _file):
         return np.load(_file)
 
-    def pic_match(self, _img):
+    def pic_match(self, _img, _estimater_pose):
         img_test = _img
+        d = 10000
+        obj = ''
         #img_test = cv.filter2D(img_test, -1, self.kernel)
         #img_query = _img_query
         kp_test, des_test = self.detecter.detectAndCompute(img_test, None)
@@ -99,65 +102,72 @@ class PoseEstimater():
         index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
         search_params = dict(checks=50)
         flann = cv.FlannBasedMatcher(index_params, search_params)
-        for obj in self.dataset.keys():
-            des_query = self.dataset[obj]['des']
-            kp_query = self.dataset[obj]['kp']
-            matches = flann.knnMatch(des_query, des_test, k=2)
-            good = []
-            kp_good_match_query = []
-            des_good_match_query = []
-            for m, n in matches:
-                if m.distance < 0.56 * n.distance:
-                    good.append(m)
-                    '''print('--------------------\n')
-                    print('m.imgIdx: {}\n'.format(m.imgIdx))
-                    print('m.queryIdx: {}\n'.format(m.queryIdx))
-                    print('m.trainIdx: {}\n'.format(m.trainIdx))
-                    print('kp_query: {}\n'.format(kp_query[m.queryIdx].pt))
-                    print('kp_test: {}\n'.format(kp_test[m.trainIdx].pt))'''
-                    kp_good_match_query.append(kp_query[m.queryIdx])
-                    des_good_match_query.append(des_query[m.queryIdx])
-            # print('the num of finding featurs of query is {}\n'.format(len(des_query)))
-            # print('the num of finding featurs of test is {}\n'.format(len(des_test)))
-            # print('the num of finding matches is {}\n'.format(len(matches)))
-            print("good mathch of {}: {}".format(obj, len(good)))
-            if len(good) > self.min_match:
-                src_pts = np.float32([kp_good_match_query[i].pt for i in range(len(kp_good_match_query))]).reshape(-1, 1, 2)
-                dst_pts = np.float32([kp_test[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
-                M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
-                matchesMask = mask.ravel().tolist()
-                if M is not None and mask is not None:
-                    pxel = self.dataset[obj]['wpixel'].reshape(-1, 1, 2)
-                    pxel = cv.perspectiveTransform(pxel, M)
-                    if self.showmatchflag == 1:
-                        img_query = self.img_query[obj]
-                        h, w = img_query.shape[0:2]
-                        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-                        dst = cv.perspectiveTransform(pts, M)
-                        #print('sss {}'.format(wpxel))
-                        img_test = cv.polylines(img_test, [np.int32(dst)], True, 255, 1, cv.LINE_AA)
-                        draw_params = dict(matchColor=(0, 255, 0),
-                                           singlePointColor=None,
-                                           matchesMask=matchesMask,
-                                           flags=2)
-                        mimg = cv.drawMatches(img_query, kp_query, img_test, kp_test, good, None, **draw_params)
-                        tmppoint = pxel.reshape(-1, 1)
-                        point = []
-                        for i in range(0, len(tmppoint), 2):
-                            point.append((int(tmppoint[i]+img_query.shape[1]), int(tmppoint[i + 1])))
-                        img = mimg
-                        for p in point:
-                            img = cv.circle(img, p, 4, (255, 0, 0), -1)
-                        # self.queue.put(img)
-                        # plt.imshow(img)
-                        # plt.show()
-                        # cv.imwrite(str(self.index)+'.jpg', img)
-                        self.match_img = img
-                    return obj, pxel
+        for _obj in self.dataset.keys():
+            tmp_list = np.array(self.dataset[_obj]['flag_point'])
+            tmp = np.linalg.norm(tmp_list-np.array(_estimater_pose[0:3]), 2)
+            print('obj:{}, distance:{}'.format(_obj, tmp))
+            if tmp < d:
+                d = tmp
+                obj = _obj
+        print("choose {}".format(obj))
+        des_query = self.dataset[obj]['des']
+        kp_query = self.dataset[obj]['kp']
+        matches = flann.knnMatch(des_query, des_test, k=2)
+        good = []
+        kp_good_match_query = []
+        des_good_match_query = []
+        for m, n in matches:
+            if m.distance < 0.6 * n.distance:
+                good.append(m)
+                '''print('--------------------\n')
+                print('m.imgIdx: {}\n'.format(m.imgIdx))
+                print('m.queryIdx: {}\n'.format(m.queryIdx))
+                print('m.trainIdx: {}\n'.format(m.trainIdx))
+                print('kp_query: {}\n'.format(kp_query[m.queryIdx].pt))
+                print('kp_test: {}\n'.format(kp_test[m.trainIdx].pt))'''
+                kp_good_match_query.append(kp_query[m.queryIdx])
+                des_good_match_query.append(des_query[m.queryIdx])
+        # print('the num of finding featurs of query is {}\n'.format(len(des_query)))
+        # print('the num of finding featurs of test is {}\n'.format(len(des_test)))
+        # print('the num of finding matches is {}\n'.format(len(matches)))
+        print("good mathch of {}: {}".format(obj, len(good)))
+        if len(good) > self.min_match:
+            src_pts = np.float32([kp_good_match_query[i].pt for i in range(len(kp_good_match_query))]).reshape(-1, 1, 2)
+            dst_pts = np.float32([kp_test[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
+            M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
+            matchesMask = mask.ravel().tolist()
+            if M is not None and mask is not None:
+                pxel = self.dataset[obj]['wpixel'].reshape(-1, 1, 2)
+                pxel = cv.perspectiveTransform(pxel, M)
+                if self.showmatchflag == 1:
+                    img_query = self.img_query[obj]
+                    h, w = img_query.shape[0:2]
+                    pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+                    dst = cv.perspectiveTransform(pts, M)
+                    #print('sss {}'.format(wpxel))
+                    img_test = cv.polylines(img_test, [np.int32(dst)], True, 255, 1, cv.LINE_AA)
+                    draw_params = dict(matchColor=(0, 255, 0),
+                                       singlePointColor=None,
+                                       matchesMask=matchesMask,
+                                       flags=2)
+                    mimg = cv.drawMatches(img_query, kp_query, img_test, kp_test, good, None, **draw_params)
+                    tmppoint = pxel.reshape(-1, 1)
+                    point = []
+                    for i in range(0, len(tmppoint), 2):
+                        point.append((int(tmppoint[i]+img_query.shape[1]), int(tmppoint[i + 1])))
+                    img = mimg
+                    for p in point:
+                        img = cv.circle(img, p, 4, (255, 0, 0), -1)
+                    # self.queue.put(img)
+                    # plt.imshow(img)
+                    # plt.show()
+                    # cv.imwrite(str(self.index)+'.jpg', img)
+                    self.match_img = img
+                return obj, pxel
         return None, None
 
-    def estimate_pose(self, _img):
-        obj, _wpxel = self.pic_match(_img)
+    def estimate_pose(self, _img, estimater_pose):
+        obj, _wpxel = self.pic_match(_img, estimater_pose)
         if obj is not None and _wpxel is not None:
             wpt = self.dataset[obj]['wpoint'].reshape(-1, 3)
             _wpxel = _wpxel.reshape(-1, 2)
@@ -209,7 +219,8 @@ class PoseEstimater():
             # print(pose_z)
             pose = np.array([pose_x, pose_y,pose_z])
             print('a:{}'.format(a))
-            cv.imwrite('/home/jakeluo/tello_project/log/match_img/'+str(pose_x)+'-'+str(pose_y)+'-'+str(pose_z)+'-'+str(a)+'.jpg', self.match_img)
+            if self.showmatchflag == 1:
+                cv.imwrite('/home/jakeluo/tello_project/log/match_img/'+str(pose_x)+'-'+str(pose_y)+'-'+str(pose_z)+'-'+str(a)+'.jpg', self.match_img)
             return pose, -a
             # # print('pose: {},{}'.format(pose_x, pose_y))
             # wpt = self.dataset[obj]['wpoint'].reshape(-1, 1, 3)

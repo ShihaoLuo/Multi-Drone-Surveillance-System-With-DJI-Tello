@@ -10,5 +10,5 @@ import cv2 as cv
 
 p = PoseEstimater(min_match=20)
 p.loaddata('pose_estimater/dataset/')
-img_test = cv.imread("./pose_estimater/dataset/table_test/images/table_test5.jpg")
+img_test = cv.imread("pose_estimater/dataset/table1/images/table_test5.jpg")
 p.estimate_pose(img_test)

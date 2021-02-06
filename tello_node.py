@@ -51,6 +51,10 @@ class TelloNode:
         # frame_dict = {}.fromkeys(self.tello_ip_list,bytes())
         print("show pic thread start.\n")
         while True:
+            if self.main_flag.value == 1:
+                while self.path.empty() is False:
+                    self.path.get()
+                break
             a = cv.waitKey(2)
             if a == 113:
                 cv.destroyAllWindows()
@@ -205,33 +209,9 @@ class TelloNode:
         run_thread.start()
 
     def update_pos(self, _last_cmd, _last_pose):
-        time.sleep(2.5)
-        img = None
+        time.sleep(0.3)
+        # img = None
         pose = np.array([0, 0, 0, 0])
-        if self.queue.empty() is False:
-            img = self.queue.get()
-        if img is not None:
-            _pose, yaw = self.pose_estimater.estimate_pose(img)
-            if _pose is not None:
-                print('in img1')
-                while self.queue.empty() is True:
-                    time.sleep(0.01)
-                img = self.queue.get()
-                _pose, yaw = self.pose_estimater.estimate_pose(img)
-                if _pose is not None:
-                    print('in img2')
-                    pose[0] = _pose[0]
-                    pose[1] = _pose[1]
-                    # if _pose[2] == 0:
-                    #     pose[2] = _last_pose[2]
-                    # else:
-                    #     pose[2] = _pose[2]
-                    pose[2] = _pose[2]
-                    if yaw < 0:
-                        yaw += 360
-                    pose[3] = yaw
-                    print('update pose of:', self.tello_ip, pose)
-                    return pose
         if '>ccw' in _last_cmd:
             angle = float(_last_cmd.partition(' ')[2])
             # print('angle:{}'.format(angle))
@@ -241,7 +221,7 @@ class TelloNode:
             pose[0:3] = _last_pose[0:3]
         elif '>cw' in _last_cmd:
             angle = float(_last_cmd.partition(' ')[2])
-            print('angle:{}'.format(angle))
+            # print('angle:{}'.format(angle))
             pose[3] = _last_pose[3] - angle
             if pose[3] >= 360:
                 pose[3] -= 360
@@ -264,6 +244,30 @@ class TelloNode:
             pose = _last_pose
         else:
             pose = _last_pose
+        if self.queue.empty() is False:
+            img = self.queue.get()
+            if img is not None:
+                _pose, yaw = self.pose_estimater.estimate_pose(img, pose)
+                # if _pose is not None:
+                #     print('in img1')
+                #     while self.queue.empty() is True:
+                #         time.sleep(0.01)
+                #     img = self.queue.get()
+                #     _pose, yaw = self.pose_estimater.estimate_pose(img)
+                if _pose is not None and np.linalg.norm(_pose[0:2] - pose[0:2], 2) < 100 and _pose[2] - pose[2]<50:
+                    print('in img2')
+                    pose[0] = int(_pose[0])
+                    pose[1] = int(_pose[1])
+                    # if _pose[2] == 0:
+                    #     pose[2] = _last_pose[2]
+                    # else:
+                    #     pose[2] = _pose[2]
+                    pose[2] = int(_pose[2])
+                    if yaw < 0:
+                        yaw += 360
+                    pose[3] = int(yaw)
+                    # print('update pose of:', self.tello_ip, pose)
+                    # return pose
         print('update pose of:', self.tello_ip, pose)
         return pose
 
@@ -277,14 +281,14 @@ class TelloNode:
             self.target.value = ','.join(map(str, self.init_pose)).encode()
             time.sleep(0.1)
             while self.permission_flag.value == 0:
-                old_time = time.time()
                 # print('wait for permission of ', self.tello_ip, self.permission_flag.value)
                 if time.time() - old_time >= 5:
                     with self.cmd.get_lock():
                         self.cmd.value = b'>command'
                         print('update cmd, >command')
                     self.cmd_event.set()
-                time.sleep(0.2)
+                    old_time = time.time()
+                time.sleep(0.1)
             self.permission_flag.value = 0
             while self.Res_flag.value == 0:
                 time.sleep(0.1)
@@ -294,12 +298,10 @@ class TelloNode:
                 self.cmd.value = b'>takeoff'
             self.cmd_event.set()
             print('update cmd, >takeoff')
-            time.sleep(0.1)
             self.pose.put(self.update_pos('>takeoff', self.pose.get()))
             tmp = self.init_pose
             tmp[2] = tmp[2] + 100
             self.target.value = ','.join(map(str, tmp)).encode()
-            time.sleep(0.1)
             # while self.permission_flag.value == 0:
             #     # print('wait for permission 1.5,', self.permission_flag.value)
             #     old_time = time.time()
@@ -319,7 +321,6 @@ class TelloNode:
                 self.cmd.value = b'>up 130'
             self.cmd_event.set()
             print('update cmd, >up 170')
-            time.sleep(0.1)
             while self.Res_flag.value == 0:
                 time.sleep(0.1)
             with self.Res_flag.get_lock():
@@ -339,7 +340,6 @@ class TelloNode:
                 self.cmd.value = b'>downvision 1'
             self.cmd_event.set()
             print('update cmd, >downvision 1')
-            time.sleep(0.1)
             self.takeoff_flag.value = 0
         while True:
             # print('in update cmd, main alg {}'.format(self.main_flag.value))
@@ -356,10 +356,10 @@ class TelloNode:
                     self.Res_flag.value = 0
                 # self.cmd_res.get()
                 with self.cmd.get_lock():
-                    self.cmd.value = b'wait 5'
+                    self.cmd.value = b'wait 10'
                 self.cmd_event.set()
-                print('update cmd, wait 5')
-                time.sleep(5)
+                print('update cmd, wait 10')
+                time.sleep(10)
                 if self.path.empty() is True:
                     print('in run thread, no path updated, break...', self.tello_ip)
                     break
@@ -402,8 +402,7 @@ class TelloNode:
             #     self.video_flag = 0
             print("--------------------------")
             print("target:{}".format(target))
-            self.update_path_event.wait()
-            time.sleep(0.1)
+            # time.sleep(0.1)
             while self.permission_flag.value == 0:
                 # print('wait for permission, 2', self.permission_flag.value)
                 old_time = time.time()
@@ -411,7 +410,7 @@ class TelloNode:
                 if time.time() - old_time >= 5:
                     with self.cmd.get_lock():
                         self.cmd.value = b'>command'
-                        print('update cmd, >command')
+                        # print('update cmd, >command')
                     self.cmd_event.set()
                 time.sleep(0.2)
             self.permission_flag.value = 0
@@ -434,6 +433,8 @@ class TelloNode:
                               [0, 0, 1]])
                 tmp = target[0:3] - pose[0:3]
                 tmp = np.dot(m, tmp)
+                if tmp[2] > 50:
+                    tmp[2] = 50
                 tmp = np.append(tmp, 100)
                 tmp = [int(i) for i in tmp]
                 tmp = [str(i) for i in tmp]
@@ -464,23 +465,39 @@ class TelloNode:
             pose = self.pose.get()
             self.pose.put(pose)
             theta = target[3] - pose[3]
-            if abs(theta) > 10:
-                if abs(theta) > 180:
-                    cmd = 'cw ' + str(theta + 360)
-                    # self.cmd_res.get()
-                    with self.cmd.get_lock():
-                        self.cmd.value = ('>' + cmd).encode()
-                    self.cmd_event.set()
-                    print('update cmd, >' + cmd)
-                    # self.send_command(">" + cmd)
-                    cmd = 'ccw ' + str(theta)
+            if abs(theta) > 5:
+                if theta < 0:
+                    if abs(theta) > 180:
+                        cmd = 'ccw ' + str(theta + 360)
+                        # self.cmd_res.get()
+                        with self.cmd.get_lock():
+                            self.cmd.value = ('>' + cmd).encode()
+                        self.cmd_event.set()
+                        print('update cmd, >' + cmd)
+                        # self.send_command(">" + cmd)
+                    else:
+                        cmd = 'ccw ' + str(theta)
+                        with self.cmd.get_lock():
+                            self.cmd.value = ('>' + cmd).encode()
+                        self.cmd_event.set()
+                        print('update cmd, >' + cmd)
+                        # self.send_command(">" + cmd)
                 else:
-                    cmd = 'ccw ' + str(theta)
-                    with self.cmd.get_lock():
-                        self.cmd.value = ('>' + cmd).encode()
-                    self.cmd_event.set()
-                    print('update cmd, >' + cmd)
-                    # self.send_command(">" + cmd)
+                    if abs(theta) > 180:
+                        cmd = 'ccw ' + str(theta - 360)
+                        # self.cmd_res.get()
+                        with self.cmd.get_lock():
+                            self.cmd.value = ('>' + cmd).encode()
+                        self.cmd_event.set()
+                        print('update cmd, >' + cmd)
+                        # self.send_command(">" + cmd)
+                    else:
+                        cmd = 'ccw ' + str(theta)
+                        with self.cmd.get_lock():
+                            self.cmd.value = ('>' + cmd).encode()
+                        self.cmd_event.set()
+                        print('update cmd, >' + cmd)
+                        # self.send_command(">" + cmd)
             else:
                 cmd = 'command'
                 with self.cmd.get_lock():

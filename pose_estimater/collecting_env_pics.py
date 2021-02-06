@@ -17,7 +17,7 @@ controller.command("battery_check 20")
 controller.command("correct_ip")
 video = tello_video.Tello_Video(controller.tello_list)
 
-name = 'table_test'
+name = 'table2'
 num = 6
 
 pic_folder = './dataset/'+name
@@ -28,7 +28,7 @@ if not os.path.exists(pic_folder):
     os.mkdir(pic_folder)
 
 
-init_command = ['setfps high', 'setresolution high', 'setbitrate 5', 'streamon', 'downvision 1', 'takeoff', 'up 100']
+init_command = ['setfps high', 'setresolution high', 'setbitrate 5', 'streamon', 'downvision 1', 'takeoff', 'up 130']
 move_command = ['forward 20', 'right 20', 'left 20', 'back 40', 'right 20', 'left 20']
 
 try:

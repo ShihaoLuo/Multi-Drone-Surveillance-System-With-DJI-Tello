@@ -42,7 +42,7 @@ def scheduler(tello_node, permission_flag):
                         pass
                     else:
                         d = np.linalg.norm(np.array(target[key][0:2]) - np.array(target[key2][0:2]), 2)
-                        if d <= 200:
+                        if d <= 150:
                             tmp.append(key2)
                 if len(tmp) == 0:
                     permission_list.append(key)
@@ -102,11 +102,30 @@ def received_ok(kwargs):
 
 
 path1 = [[240, 80, 230, 0],
-         [270, 80, 230, 0],
-         [240, 110, 230, 0],
-         [240, 50, 230, 0]]
+         [240, 130, 230, 0],
+         [240, 180, 230, 0],
+         [240, 230, 230, 0],
+         [240, 280, 230, 0],
+         [240, 330, 230, 0],
+         [240, 380, 230, 0],
+         [240, 430, 230, 0],
+         [240, 480, 230, 0],
+         [240, 530, 230, 0],
+         [280, 480, 230, 0],
+         [330, 430, 230, 0],
+         [380, 380, 230, 0],
+         [380, 330, 230, 0],
+         [380, 280, 230, 0],
+         [380, 230, 230, 0],
+         [380, 180, 230, 0],
+         [380, 130, 230, 0],
+         [380, 80, 230, 0],
+         [330, 30, 230 ,0],
+         [280, -20, 230, 0],
+         [240, 30, 230 ,0]]
 
-num = 1
+
+num = 2
 Node = {}
 Res_flag = {}
 Permission_flag = {}
@@ -140,11 +159,11 @@ try:
             main_thread_flag.Value = 1
             time.sleep(1)
             break
-        if time.time() - old >= 5:
+        if time.time() - old >= 10:
             for i in range(len(tello_list)):
                 Node[tello_list[i][0]].update_path(path1)
             old = time.time()
-        if time.time() - old1 >= 160:
+        if time.time() - old1 >= 300:
             for i in range(len(tello_list)):
                 Node[tello_list[i][0]].send_command('>streamoff')
                 time.sleep(0.5)

@@ -10,4 +10,4 @@ from pose_estimater.pose_estimater import *
 po = PoseEstimater(min_match=15)
 po.loaddata('pose_estimater/dataset/')
 po.showdataset()
-po.modifydata('wall', True, False)
+# po.modifydata('wall', True, False)
