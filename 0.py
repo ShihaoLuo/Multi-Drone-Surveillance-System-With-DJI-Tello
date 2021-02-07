@@ -107,7 +107,7 @@ path1 = [[240, 80, 230, 0],
          [500, 80, 230, 0]]
 
 
-num = 4
+num = 1
 Node = {}
 Res_flag = {}
 Permission_flag = {}

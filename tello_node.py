@@ -68,8 +68,9 @@ class TelloNode:
                     f[tello.tello_ip] = self.queue[tello.tello_ip].get()
                     cv2.imshow(tello.tello_ip, f[tello.tello_ip])
             flag = []'''
-            if self.queue.qsize() > 1:
+            if self.queue.empty() is False:
                 f = self.queue.get()
+                self.queue.put(f)
                 cv.imshow(self.tello_ip, f)
                 time.sleep(0.01)
 
@@ -154,7 +155,7 @@ class TelloNode:
                 frame = np.fromstring(frame, dtype=np.ubyte, count=len(frame), sep='')
                 frame = (frame.reshape((h, ls // 3, 3)))
                 frame = frame[:, :w, :]
-                while self.queue.qsize() >= 2:
+                while self.queue.empty() is False:
                     self.queue.get()
                 self.queue.put(frame)
 
@@ -272,6 +273,7 @@ class TelloNode:
             pose = _last_pose
         if self.queue.empty() is False:
             img = self.queue.get()
+            self.queue.put(img)
             if img is not None:
                 _pose, yaw = self.pose_estimater.estimate_pose(img, pose)
                 # if _pose is not None:
