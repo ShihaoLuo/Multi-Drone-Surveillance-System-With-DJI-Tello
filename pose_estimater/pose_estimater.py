@@ -105,7 +105,7 @@ class PoseEstimater():
         for _obj in self.dataset.keys():
             tmp_list = np.array(self.dataset[_obj]['flag_point'])
             tmp = np.linalg.norm(tmp_list-np.array(_estimater_pose[0:3]), 2)
-            print('obj:{}, distance:{}'.format(_obj, tmp))
+            # print('obj:{}, distance:{}'.format(_obj, tmp))
             if tmp < d:
                 d = tmp
                 obj = _obj
@@ -130,7 +130,7 @@ class PoseEstimater():
         # print('the num of finding featurs of query is {}\n'.format(len(des_query)))
         # print('the num of finding featurs of test is {}\n'.format(len(des_test)))
         # print('the num of finding matches is {}\n'.format(len(matches)))
-        print("good mathch of {}: {}".format(obj, len(good)))
+        # print("good mathch of {}: {}".format(obj, len(good)))
         if len(good) > self.min_match:
             src_pts = np.float32([kp_good_match_query[i].pt for i in range(len(kp_good_match_query))]).reshape(-1, 1, 2)
             dst_pts = np.float32([kp_test[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
@@ -173,8 +173,8 @@ class PoseEstimater():
             _wpxel = _wpxel.reshape(-1, 2)
             self.transformpxel = _wpxel.copy()
             # print(_wpxel, wpt)
-            _wpxel[:, 0] = (_wpxel[:, 0]-self.camera_matrix[0, 2])*9.2547 / 10
-            _wpxel[:, 1] = (_wpxel[:, 1] - self.camera_matrix[1, 2]) * 9.2547 / 10
+            _wpxel[:, 0] = (_wpxel[:, 0]-self.camera_matrix[0, 2])*9.8 / 10
+            _wpxel[:, 1] = (_wpxel[:, 1] - self.camera_matrix[1, 2]) * 9.8 / 10
             # print(_wpxel, wpt)
             # a = math.atan2(v[1], v[0]) / math.pi * 180
             # cross = np.cross(-_wpxel[0], v)

@@ -16,7 +16,7 @@ import numpy as np
 # import joblib
 #import set_world_point
 
-object_name = 'table2'
+object_name = 'table4'
 
 def save_2_jason(_file, arr):
     data = {}

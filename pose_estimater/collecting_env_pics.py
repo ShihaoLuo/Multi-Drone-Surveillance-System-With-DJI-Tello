@@ -17,7 +17,7 @@ controller.command("battery_check 20")
 controller.command("correct_ip")
 video = tello_video.Tello_Video(controller.tello_list)
 
-name = 'table2'
+name = 'table4'
 num = 6
 
 pic_folder = './dataset/'+name

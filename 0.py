@@ -102,30 +102,12 @@ def received_ok(kwargs):
 
 
 path1 = [[240, 80, 230, 0],
-         [240, 130, 230, 0],
-         [240, 180, 230, 0],
-         [240, 230, 230, 0],
-         [240, 280, 230, 0],
-         [240, 330, 230, 0],
-         [240, 380, 230, 0],
-         [240, 430, 230, 0],
-         [240, 480, 230, 0],
-         [240, 530, 230, 0],
-         [280, 480, 230, 0],
-         [330, 430, 230, 0],
-         [380, 380, 230, 0],
-         [380, 330, 230, 0],
-         [380, 280, 230, 0],
-         [380, 230, 230, 0],
-         [380, 180, 230, 0],
-         [380, 130, 230, 0],
-         [380, 80, 230, 0],
-         [330, 30, 230 ,0],
-         [280, -20, 230, 0],
-         [240, 30, 230 ,0]]
+         [240, 800, 230, 0],
+         [500, 800, 230, 0],
+         [500, 80, 230, 0]]
 
 
-num = 2
+num = 4
 Node = {}
 Res_flag = {}
 Permission_flag = {}
@@ -176,6 +158,9 @@ try:
 except KeyboardInterrupt as e:
     for i in range(len(tello_list)):
         Node[tello_list[i][0]].send_command('>streamoff')
+        time.sleep(0.5)
+        Node[tello_list[i][0]].send_command('>land')
+    for i in range(len(tello_list)):
         time.sleep(0.5)
         Node[tello_list[i][0]].send_command('>land')
 

@@ -27,6 +27,7 @@ class TelloNode:
         self.video_socket.bind(('', self.video_port))
         self.h264decoder = h264decoder.H264Decoder()
         self.queue = multiprocessing.Queue()
+        self.queue_up_camera = multiprocessing.Queue()
         self.pose_estimater = PoseEstimater('SIFT', 25)
         self.pose_estimater.loaddata('pose_estimater/dataset/')
         if show_match_flag == 1:
@@ -96,10 +97,35 @@ class TelloNode:
         update_path_thread = multiprocessing.Process(target=self._update_path, args=(path,))
         update_path_thread.start()
 
-    def _update_path(self, path):
+    def _update_path(self, path1):
         if self.takeoff_flag.value == 1:
             pass
         else:
+            path = np.array(path1)
+            path_x = path[:, 0]
+            path_y = path[:, 1]
+            path_z = path[:, 2]
+            path_theta = path[:, 3]
+            for i in range(5):
+                path_x = path_x.repeat(2)[:-1]
+                path_y = path_y.repeat(2)[:-1]
+                path_z = path_z.repeat(2)[:-1]
+                path_theta = path_theta.repeat(2)[:-1]
+                path_x[1::2] = (path_x[2::2] - path_x[1::2]) / 2 + path_x[1::2]
+                path_y[1::2] = (path_y[2::2] - path_y[1::2]) / 2 + path_y[1::2]
+                path_z[1::2] = (path_z[2::2] - path_z[1::2]) / 2 + path_z[1::2]
+                path_theta[1::2] = (path_theta[2::2] - path_theta[1::2]) / 2 + path_theta[1::2]
+            distance = np.sqrt(np.ediff1d(path_x) ** 2 + np.ediff1d(path_y) ** 2 + np.ediff1d(path_z) ** 2)
+            d = 0.0
+            equdist_waypoint = [[path_x[0]], [path_y[0]], [path_z[0]], [path_theta[0]]]
+            for i in range(len(distance)):
+                d = distance[i] + d
+                if d >= 50:
+                    equdist_waypoint = np.append(equdist_waypoint,
+                                                 [[path_x[i]], [path_y[i]], [path_z[i]], [path_theta[i]]])
+                    d = 0.0
+            equdist_waypoint = np.append(equdist_waypoint, path[-1])
+            path = equdist_waypoint.reshape((-1, 4))
             self.update_path_event.clear()
             print('updating the path______________________________________', self.tello_ip)
             tmp = np.array(path)
@@ -111,7 +137,7 @@ class TelloNode:
             a = np.argmin(d)
             while self.path.empty() is False:
                 self.path.get()
-            if a == len(tmp)-1:
+            if a >= len(tmp)-2:
                 for t in tmp:
                     self.path.put(t)
             else:
@@ -191,10 +217,10 @@ class TelloNode:
             # print('in run , target:', self.target.value)
             # print("video thread is alive,", video_thread.is_alive())
             # print("cmd thread is alive,", cmd_thread.is_alive())
-            self.cmd_event.wait()
             if self.run_thread_flag.value == 1 or self.main_flag.value == 1:
                 time.sleep(1)
                 break
+            self.cmd_event.wait()
             with self.cmd.get_lock():
                 cmd = self.cmd.value.decode()
             self.send_command(cmd)
@@ -254,7 +280,7 @@ class TelloNode:
                 #         time.sleep(0.01)
                 #     img = self.queue.get()
                 #     _pose, yaw = self.pose_estimater.estimate_pose(img)
-                if _pose is not None and np.linalg.norm(_pose[0:2] - pose[0:2], 2) < 100 and _pose[2] - pose[2]<50:
+                if _pose is not None and abs(_pose[2] - pose[2]) < 30:
                     print('in img2')
                     pose[0] = int(_pose[0])
                     pose[1] = int(_pose[1])
@@ -365,6 +391,8 @@ class TelloNode:
                     break
             self.update_path_event.wait()
             target = self.path.get()
+            if self.path.empty() is True:
+                self.path.put(target)
             self.target.value = ','.join(map(str, target)).encode()
             # if self.video_flag == 0 and pose[1] < 100:
             #     if self.main_flag.value == 1:
@@ -433,8 +461,10 @@ class TelloNode:
                               [0, 0, 1]])
                 tmp = target[0:3] - pose[0:3]
                 tmp = np.dot(m, tmp)
-                if tmp[2] > 50:
-                    tmp[2] = 50
+                if tmp[2] > 10:
+                    tmp[2] = 10
+                elif tmp[2] < -10:
+                    tmp[2] = -10
                 tmp = np.append(tmp, 100)
                 tmp = [int(i) for i in tmp]
                 tmp = [str(i) for i in tmp]
