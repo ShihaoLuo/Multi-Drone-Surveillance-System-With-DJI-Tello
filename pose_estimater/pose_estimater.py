@@ -112,7 +112,10 @@ class PoseEstimater():
         print("choose {}".format(obj))
         des_query = self.dataset[obj]['des']
         kp_query = self.dataset[obj]['kp']
-        matches = flann.knnMatch(des_query, des_test, k=2)
+        try:
+            matches = flann.knnMatch(des_query, des_test, k=2)
+        except cv.error:
+            return None, None
         good = []
         kp_good_match_query = []
         des_good_match_query = []

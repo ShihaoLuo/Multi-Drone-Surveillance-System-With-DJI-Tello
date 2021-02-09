@@ -123,7 +123,7 @@ rec_thread = multiprocessing.Process(target=received_ok, args=(Res_flag,), daemo
 rec_thread.start()
 for i in range(num):
     Node[tello_list[i][0]] = TelloNode(tello_list[i], Res_flag[tello_list[i][0]],
-                                       main_thread_flag, Permission_flag[tello_list[i][0]], 1)
+                                       main_thread_flag, Permission_flag[tello_list[i][0]], 0)
     Node[tello_list[i][0]].init_path(path1, [240, 80, 85, 0])
     Node[tello_list[i][0]].run()
 per_thread = multiprocessing.Process(target=scheduler, args=(Node, Permission_flag), daemon=True)
@@ -143,7 +143,13 @@ try:
             break
         if time.time() - old >= 10:
             for i in range(len(tello_list)):
-                Node[tello_list[i][0]].update_path(path1)
+                if Node[tello_list[i][0]].get_path_status() == 1:
+                    Node[tello_list[i][0]].update_path(path1)
+                # tmp = Node[tello_list[i][0]].get_up_camera_image()
+                # if tmp is not None:
+                #     pose = [str(i) for i in tmp['pose']]
+                #     pose = '-'.join(pose)
+                #     cv.imwrite('./'+pose+'.jpg', tmp['image'])
             old = time.time()
         if time.time() - old1 >= 300:
             for i in range(len(tello_list)):
