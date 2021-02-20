@@ -11,6 +11,8 @@ import multiprocessing
 import h264decoder
 from pose_estimater.pose_estimater import *
 import psutil
+import os
+import signal
 
 
 class TelloNode:
@@ -49,7 +51,7 @@ class TelloNode:
         self.init_pose = []
         self.show_video_thread = multiprocessing.Process(target=self.show_pic)
         self.show_video_thread.start()
-        self.switch_count = 2
+        self.switch_count = 3
         self.thread_list = []
 
     def get_up_camera_image(self):
@@ -211,15 +213,15 @@ class TelloNode:
     def _receive_video_thread(self):
         pack_data = ''
         print("receive video thread start....")
-        oldtime = time.time()
         while True:
-            res_string, ip = self.video_socket.recvfrom(2000)
+            res_string, ip = self.video_socket.recvfrom(1500)
             pack_data += res_string.hex()
             if len(res_string) != 1460:
                 try:
                     self._h264_decode(bytes.fromhex(pack_data))
                 except:
-                    break
+                    print("decode error.")
+                    time.sleep(2)
                 pack_data = ''
                 # if time.time() - oldtime > 5:
                 #     print("get video data from", self.tello_ip)
@@ -260,11 +262,12 @@ class TelloNode:
                     wait_time = cnt
 
     def run_thread(self):
+        # last_per = 1
         print('run thread start....')
-        video_thread = multiprocessing.Process(target=self._receive_video_thread, daemon=True)
+        video_thread = multiprocessing.Process(target=self._receive_video_thread)
         video_thread.start()
         print("video pid of {} is {}".format(self.tello_ip, video_thread.pid))
-        cmd_thread = multiprocessing.Process(target=self.update_cmd, daemon=True)
+        cmd_thread = multiprocessing.Process(target=self.update_cmd)
         cmd_thread.start()
         print("cmd thread of {} is {}".format(self.tello_ip, cmd_thread.pid))
         time.sleep(1)
@@ -274,16 +277,32 @@ class TelloNode:
         self.cmd_event.set()
         self.update_path_event.set()
         while True:
-            if time.time() - old_time > 5:
-                self.thread_list = psutil.pids()
-                print(self.thread_list)
-                if video_thread.pid not in self.thread_list:
-                    print("video thread pid not in the list, restart thread.")
-                    video_thread.start()
-                    print("new video pid of {} is {}".format(self.tello_ip, video_thread.pid))
-                else:
-                    print("video thread pid {} in the list".format(video_thread.pid))
-                old_time = time.time()
+            # if time.time() - old_time > 5 and self.takeoff_flag.value == 0:
+            #     # self.thread_list = psutil.pids()
+            #     # if video_thread.pid not in self.thread_list:
+            #     #     print("video thread pid not in the list, restart thread.")
+            #     #     video_thread.start()
+            #     #     print("new video pid of {} is {}".format(self.tello_ip, video_thread.pid))
+            #     # else:
+            #     #     print("video thread pid {} in the list".format(video_thread.pid))
+            #     p = psutil.Process(video_thread.pid)
+            #     test_list = []
+            #     for i in range(10):
+            #         p_cpu = p.cpu_percent(interval=0.1)
+            #         test_list.append(p_cpu)
+            #     per = sum(test_list)/len(test_list)
+            #     if last_per == 0 and per == 0:
+            #         print("Kill the video thread.")
+            #         os.kill(video_thread.pid, signal.SIGKILL)
+            #         print("restart video thread.")
+            #         video_thread = multiprocessing.Process(target=self._receive_video_thread)
+            #         video_thread.start()
+            #         print("new video thread pid:", video_thread.pid)
+            #         last_per = 1
+            #     else:
+            #         last_per = per
+            #     # print("Process {}: cpu percent:{}".format(video_thread.pid, sum(test_list)/len(test_list)))
+            #     old_time = time.time()
             # print('in run , target:', self.target.value)
             # print("video thread is alive,", video_thread.is_alive())
             # print("cmd thread is alive,", cmd_thread.is_alive())
@@ -305,6 +324,7 @@ class TelloNode:
     def run(self):
         run_thread = multiprocessing.Process(target=self.run_thread)
         run_thread.start()
+        print("run pid of {} is {}".format(self.tello_ip, run_thread.pid))
 
     def update_pos(self, _last_cmd, _last_pose):
         time.sleep(0.3)
@@ -354,7 +374,7 @@ class TelloNode:
                 #     img = self.queue.get()
                 #     _pose, yaw = self.pose_estimater.estimate_pose(img)
                 if _pose is not None:
-                    # print('in img2')
+                    print('in img2')
                     pose[0] = int(_pose[0])
                     pose[1] = int(_pose[1])
                     # if _pose[2] == 0:
