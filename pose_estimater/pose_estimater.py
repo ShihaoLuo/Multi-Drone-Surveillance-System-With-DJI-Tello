@@ -92,7 +92,7 @@ class PoseEstimater():
 
     def pic_match(self, _img, _estimater_pose):
         img_test = _img
-        d = 700
+        d = 600
         obj = ''
         #img_test = cv.filter2D(img_test, -1, self.kernel)
         #img_query = _img_query

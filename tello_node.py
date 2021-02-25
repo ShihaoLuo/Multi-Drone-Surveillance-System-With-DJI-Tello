@@ -63,18 +63,23 @@ class TelloNode:
         self.scan_face_flag = multiprocessing.Value('i', 0)
         self.face_point = multiprocessing.Array('c', 30)
         self.face_detected_pose = multiprocessing.Array('c', 40)
+        self.face_path = multiprocessing.Queue()
+
+    def get_face_flag(self):
+        return self.scan_face_flag.value
 
     def scan_face(self):
         while True:
             if self.queue.empty() is False:
                 img = self.queue.get()
                 img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-                time1 = time.time()
-                pose = self.pose.get()
-                self.pose.put(pose)
-                for i in range(len(pose)):
-                    pose[i] = int(pose[i])
-                self.face_detected_pose.value = ','.join(map(str, pose)).encode()
+                old = time.time()
+                # time1 = time.time()
+                # pose = self.pose.get()
+                # self.pose.put(pose)
+                # for i in range(len(pose)):
+                #     pose[i] = int(pose[i])
+                # self.face_detected_pose.value = ','.join(map(str, pose)).encode()
                 locate = face_recognition.face_locations(img, number_of_times_to_upsample=1, model='hog')
                 # print("face recognition needs {}s.".format(time.time()-time1))
                 # print(locate)
@@ -90,44 +95,106 @@ class TelloNode:
                         cv.rectangle(img, p1, p2, (0, 255, 0))
                         self.queue_face.put(img)
                         # c_point = np.array([int(locate[0][0]/2+locate[0][2]/2), int(locate[0][1]/2+locate[0][3]/2)])
-                        self.face_point.value = ','.join(map(str, locate[0])).encode()
-                        tracker = cv.TrackerCSRT_create()
-                        ok = tracker.init(img, (p1[0], p1[1], p2[0]-p1[0], p2[1]-p1[1]))
-                        if ok:
-                            while True:
-                                # old = time.time()
-                                if self.queue.empty() is False:
-                                    img = self.queue.get()
-                                    img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-                                    ok, bbox = tracker.update(img)
-                                    p1 = (int(bbox[0]), int(bbox[1]))
-                                    p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-                                    # print("tracker need {}s".format(time.time()-old))
-                                    if ok and p2[0]<960 and p2[1]<720+4*h and p1[0]>0 and p1[1]>0:
-                                        cv.rectangle(img, p1, p2, (0, 255, 0))
-                                        self.queue_face.put(img)
-                                    else:
-                                        del tracker
-                                        break
-                                time.sleep(0.01)
+                        # self.face_point.value = ','.join(map(str, locate[0])).encode()
+                        tracker1 = cv.TrackerCSRT_create()
+                        # tracker2 = cv.TrackerCSRT_create()
+                        try:
+                            ok1 = tracker1.init(img, (p1[0], p1[1], p2[0]-p1[0], p2[1]-p1[1]))
+                            # ok2 = tracker2.init(img, (p1[0], p1[1], p2[0] - p1[0], p2[1] - p1[1]))
+                            if ok1:
+                                while True:
+                                    if self.queue.empty() is False:
+                                        img = self.queue.get()
+                                        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+                                        ok1, bbox1 = tracker1.update(img)
+                                        p11 = (int(bbox1[0]), int(bbox1[1]))
+                                        p21 = (int(bbox1[0] + bbox1[2]), int(bbox1[1] + bbox1[3]))
+                                        # ok2, bbox2 = tracker2.update(img)
+                                        # p12 = (int(bbox2[0]), int(bbox2[1]))
+                                        # p22 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
+                                        c_point1 = (p11[0] / 2 + p21[0] / 2, p11[1] / 2 + p21[1] / 2)
+                                        # c_point2 = (p12[0] / 2 + p22[0] / 2, p12[1] / 2 + p22[1] / 2)
+                                        # print("tracker need {}s".format(time.time()-old))
+                                        if ok1 and p21[0]<960 and p21[1]<720+2*h and p11[0]>0 and p11[1]>0:
+                                        # d = np.linalg.norm([c_point2[0]-c_point1[0], c_point2[1]-c_point1[1]])
+                                            cv.rectangle(img, p11, p21, (0, 255, 0))
+                                            # cv.rectangle(img, p12, p22, (0, 0, 255))
+                                            self.queue_face.put(img)
+                                            # if time.time() - old > 1:
+                                            if self.Res_flag.value == 1:
+                                                time.sleep(0.08)
+                                                # c_point = (p11[0]/2+p21[0]/2, p11[1]/2+p21[1]/2)
+                                                # print("c_point:", c_point)
+                                                # _pose = self.pose.get()
+                                                tmp = self.target.value
+                                                tmp = tmp.decode().split(',')
+                                                try:
+                                                    tmp = list(map(int, tmp))
+                                                except ValueError as e:
+                                                    print("error tm value.", tmp)
+                                                    del tracker1
+                                                    # del tracker2
+                                                    break
+                                                _pose = tmp
+                                                if 50 < abs(c_point1[0] - 480) < 80:
+                                                    if c_point1[0] - 480 < 0:
+                                                        _pose[3] = _pose[3] + 5
+                                                    else:
+                                                        _pose[3] = _pose[3] - 5
+                                                        if _pose[3] < 0:
+                                                            _pose[3] += 360
+                                                elif 80 < abs(c_point1[0] - 480) < 250:
+                                                    if c_point1[0] - 480 < 0:
+                                                        _pose[3] = _pose[3] + 13
+                                                    else:
+                                                        _pose[3] = _pose[3] - 13
+                                                        if _pose[3] < 0:
+                                                            _pose[3] += 360
+                                                elif abs(c_point1[0] - 480) > 250:
+                                                    if c_point1[0] - 480 < 0:
+                                                        _pose[3] = _pose[3] + 20
+                                                    else:
+                                                        _pose[3] = _pose[3] - 20
+                                                        if _pose[3] < 0:
+                                                            _pose[3] += 360
+                                                else:
+                                                    if p21[0] - p11[0] < 200:
+                                                        tmp = np.array([55, 0, 0])
+                                                        alpha = _pose[3] * 3.1416 / 180
+                                                        m = np.array([[np.cos(alpha), np.sin(alpha), 0],
+                                                                      [-np.sin(alpha), np.cos(alpha), 0],
+                                                                      [0, 0, 1]])
+                                                        tmp = np.dot(np.linalg.inv(m), tmp)
+                                                        tmp = np.append(tmp, 0)
+                                                        # print(tmp)
+                                                        _pose = _pose + tmp
+                                                self.update_path_event.clear()
+                                                while self.path.empty() is False:
+                                                    self.path.get()
+                                                _pose = [int(i) for i in _pose]
+                                                print(_pose)
+                                                self.path.put(_pose)
+                                                self.update_path_event.set()
+                                                self.scan_face_flag.value = 1
+                                                # old = time.time()
+                                        else:
+                                            del tracker1
+                                            # del tracker2
+                                            break
+                                    time.sleep(0.01)
+                        except cv.error as e:
+                            self.queue_face.put(img)
+                            self.face_point.value = ''.encode()
+                            self.scan_face_flag.value = 0
                     else:
                         self.queue_face.put(img)
+                        self.scan_face_flag.value = 0
                         self.face_point.value = ''.encode()
                 except ValueError as e:
                     self.queue_face.put(img)
                     self.face_point.value = ''.encode()
+                    self.scan_face_flag.value = 0
             time.sleep(0.02)
-
-    def get_up_camera_image(self):
-        if self.queue_up_camera.empty() is True:
-            return None
-        else:
-            _dict = {}
-            pose = self.pose.get()
-            self.pose.put(pose)
-            _dict['image'] = self.queue_up_camera.get()
-            _dict['pose'] = pose
-            return _dict
 
     def show_pic(self):
         # frame_dict = {}.fromkeys(self.tello_ip_list,bytes())
@@ -200,7 +267,7 @@ class TelloNode:
             path_y[i] = int(path_y[i])
             path_z[i] = int(path_z[i])
             path_theta[i] = int(path_theta[i])
-        for i in range(5):
+        for i in range(4):
             path_x = path_x.repeat(2)[:-1]
             path_y = path_y.repeat(2)[:-1]
             path_z = path_z.repeat(2)[:-1]
@@ -250,9 +317,6 @@ class TelloNode:
         else:
             pose = self.pose.get()
             self.pose.put(pose)
-            last_path = self.path.get()
-            # self.path.put(last_path)
-            pose[3] = last_path[3]
             path = np.array(path1)
             path = np.insert(path, 0, pose, axis=0)
             path_x = path[:, 0]
@@ -264,7 +328,7 @@ class TelloNode:
                 path_y[i] = int(path_y[i])
                 path_z[i] = int(path_z[i])
                 path_theta[i] = int(path_theta[i])
-            for i in range(5):
+            for i in range(4):
                 path_x = path_x.repeat(2)[:-1]
                 path_y = path_y.repeat(2)[:-1]
                 path_z = path_z.repeat(2)[:-1]
@@ -460,6 +524,8 @@ class TelloNode:
             pose[3] = angle + _last_pose[3]
             if pose[3] >= 360:
                 pose[3] -= 360
+            if pose[3] < 0:
+                pose[3] += 360
             pose[0:3] = _last_pose[0:3]
         elif '>cw' in _last_cmd:
             angle = float(_last_cmd.partition(' ')[2])
@@ -516,6 +582,7 @@ class TelloNode:
                     else:
                         print("error:", np.linalg.norm(pose[0:2]-_pose[0:2]))
                         print("_pose: ", _pose)
+                        self.main_flag.value = 1
         print('update pose of:', self.tello_ip, pose)
         return pose
 
@@ -642,9 +709,9 @@ class TelloNode:
             #     if self.path.empty() is True:
             #         print('in run thread, no path updated, break...', self.tello_ip)
             #         break
-            self.update_path_event.wait()
             # count = count + 1
             # time.sleep(0.1)
+            print("--------------------------")
             old_time = time.time()
             while self.permission_flag.value == 0:
                 # print('wait for permission, 2', self.permission_flag.value)
@@ -670,6 +737,7 @@ class TelloNode:
             self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
             pose = self.pose.get()
             self.pose.put(pose)
+            self.update_path_event.wait()
             target = self.path.get()
             if self.path.empty() is True:
                 self.path_empty_flag.value = 1
@@ -678,7 +746,6 @@ class TelloNode:
             else:
                 self.path_empty_flag.value = 0
             self.target.value = ','.join(map(str, target)).encode()
-            print("--------------------------")
             print("target:{}".format(target))
             if np.linalg.norm(target[0:3] - pose[0:3]) < 50:
                 cmd = 'command'
@@ -735,38 +802,9 @@ class TelloNode:
             self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
             pose = self.pose.get()
             self.pose.put(pose)
-            # if camera_flag == 1 and count == self.switch_count:
-            #     with self.cmd.get_lock():
-            #         self.cmd.value = b'>downvision 1'
-            #     self.cmd_event.set()
-            #     camera_flag = 0
-            #     count = 0
-            #     time.sleep(0.2)
-            # if camera_flag == 0 and count == self.switch_count:
-            #     with self.cmd.get_lock():
-            #         self.cmd.value = b'>downvision 0'
-            #     self.cmd_event.set()
-            #     camera_flag = 1
-            #     count = 0
-            #     time.sleep(0.2)
-            # else:
-            #     cmd = 'command'
-            #     with self.cmd.get_lock():
-            #         self.cmd.value = ('>' + cmd).encode()
-            #     self.cmd_event.set()
-            #     time.sleep(0.1)
-            # old_time = time.time()
-            # while self.Res_flag.value == 0:
-            #     if time.time() - old_time > 5:
-            #         with self.cmd.get_lock():
-            #             self.cmd.value = ('>' + cmd).encode()
-            #         self.cmd_event.set()
-            #         old_time = time.time()
-            #     time.sleep(0.1)
-            # with self.Res_flag.get_lock():
-            #     self.Res_flag.value = 0
+            print("before turn , pose:{}, target:{}", pose, target)
             theta = target[3] - pose[3]
-            if abs(theta) > 5:
+            if abs(theta) >= 3:
                 if theta < 0:
                     if abs(theta) > 180:
                         cmd = 'ccw ' + str(theta + 360)
