@@ -92,7 +92,7 @@ class PoseEstimater():
 
     def pic_match(self, _img, _estimater_pose):
         img_test = _img
-        d = 600
+        d = 800
         obj = ''
         #img_test = cv.filter2D(img_test, -1, self.kernel)
         #img_query = _img_query
@@ -147,7 +147,7 @@ class PoseEstimater():
             if M is not None and mask is not None:
                 det = np.linalg.det(M)
                 # print("det:", det)
-                if det > 0.4:
+                if det > 0.3:
                     pxel = self.dataset[obj]['wpixel'].reshape(-1, 1, 2)
                     pxel = cv.perspectiveTransform(pxel, M)
                     if self.showmatchflag == 1:

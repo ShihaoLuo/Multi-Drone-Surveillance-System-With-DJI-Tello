@@ -138,9 +138,9 @@ rec_thread.start()
 for i in range(num):
     Node[tello_list[i][0]] = TelloNode(tello_list[i], Res_flag[tello_list[i][0]],
                                        main_thread_flag, Permission_flag[tello_list[i][0]], 0)
-    ini_pose = path[i][0].copy()
-    ini_pose[2] = 85
-    Node[tello_list[i][0]].init_path(path[i], ini_pose)
+    # ini_pose = path[i][0].copy()
+    # ini_pose[2] = 85
+    Node[tello_list[i][0]].init_path(path[i], [240, 100, 85, 270])
     Node[tello_list[i][0]].run()
 per_thread = multiprocessing.Process(target=scheduler, args=(Node, Permission_flag), daemon=True)
 per_thread.start()
@@ -148,22 +148,47 @@ old = time.time()
 old1 = time.time()
 old2 = time.time()
 face_flag = 0
+target_pose = None
 try:
     while True:
         # print('in main, target:', Node[tello_list[0][0]].get_target())
+        face_flag = 0
         for i in range(len(tello_list)):
+            # print("face flag:", Node[tello_list[i][0]].get_face_flag())
             if Node[tello_list[i][0]].get_thread_flag() == 1:
                 del tello_list[i]
+            if Node[tello_list[i][0]].get_face_flag() == 1:
+                face_flag = 1
+                target_pose = Node[tello_list[i][0]].get_target_pose()
+                print("in main thread, get target pose:", target_pose)
+                print("call other drone.")
+                if target_pose is not None:
+                    while True:
+                        face_flag = 0
+                        for j in range(len(tello_list)):
+                            if Node[tello_list[j][0]].get_face_flag() == 1:
+                                path2 = []
+                                face_flag = 1
+                                target_pose = Node[tello_list[i][0]].get_target_pose()
+                                print("in main thread, update target pose:", target_pose)
+                        if time.time() - old > 10 and target_pose is not None:
+                            for k in range(len(tello_list)):
+                                Node[tello_list[k][0]].update_path2([target_pose])
+                            old = time.time()
+                        if face_flag == 0:
+                            break
+                        time.sleep(1)
         if len(tello_list) == 0:
             print('no node alive, stop the program.')
             main_thread_flag.Value = 1
             time.sleep(1)
             break
-        if time.time() - old >= 5:
-            for i in range(len(tello_list)):
-                if Node[tello_list[i][0]].get_path_status() == 1 and Node[tello_list[i][0]].get_face_flag() == 0:
-                    Node[tello_list[i][0]].update_path(path[i])
-            old = time.time()
+        if face_flag == 0:
+            if time.time() - old >= 5:
+                for i in range(len(tello_list)):
+                    if Node[tello_list[i][0]].get_path_status() == 1:
+                        Node[tello_list[i][0]].update_path(path[i])
+                old = time.time()
         if time.time() - old1 >= 300:
             for i in range(len(tello_list)):
                 Node[tello_list[i][0]].send_command('>streamoff')

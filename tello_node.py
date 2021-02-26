@@ -52,6 +52,7 @@ class TelloNode:
         self.cmd = multiprocessing.Array('c', 30)
         self.cmd_event = multiprocessing.Event()
         self.update_path_event = multiprocessing.Event()
+        self.target_pose_event = multiprocessing.Event()
         self.main_flag = main_flag
         self.permission_flag = p_flag
         self.target = multiprocessing.Array('c', 40)
@@ -64,12 +65,29 @@ class TelloNode:
         self.face_point = multiprocessing.Array('c', 30)
         self.face_detected_pose = multiprocessing.Array('c', 40)
         self.face_path = multiprocessing.Queue()
+        self.estimate_target_pose = multiprocessing.Array('c', 30)
 
     def get_face_flag(self):
         return self.scan_face_flag.value
 
+    def get_target_pose(self):
+        self.target_pose_event.wait()
+        tmp = self.estimate_target_pose.value
+        if tmp == '':
+            return None
+        try:
+            tmp = tmp.decode().split(',')
+            # print(tmp)
+            tmp = list(map(int, tmp))
+        except ValueError:
+            return None
+        # print("in get target pose: ", tmp)
+        return tmp
+
     def scan_face(self):
         while True:
+            if self.main_flag.value == 1:
+                break
             if self.queue.empty() is False:
                 img = self.queue.get()
                 img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
@@ -87,7 +105,7 @@ class TelloNode:
                     if len(locate) != 0:
                         p1 = (locate[0][3], locate[0][0])
                         p2 = (locate[0][1], locate[0][2])
-                        print(p1, p2)
+                        # print(p1, p2)
                         w = p2[0] - p1[0]
                         h = p2[1] - p1[1]
                         p1 = (int(p1[0]-1.25*w), p1[1]-h)
@@ -115,7 +133,7 @@ class TelloNode:
                                         c_point1 = (p11[0] / 2 + p21[0] / 2, p11[1] / 2 + p21[1] / 2)
                                         # c_point2 = (p12[0] / 2 + p22[0] / 2, p12[1] / 2 + p22[1] / 2)
                                         # print("tracker need {}s".format(time.time()-old))
-                                        if ok1 and p21[0]<960 and p21[1]<720+2*h and p11[0]>0 and p11[1]>0:
+                                        if ok1 and p21[0]<960 and p21[1]<720+4*h and p11[0]>0 and p11[1]>0:
                                         # d = np.linalg.norm([c_point2[0]-c_point1[0], c_point2[1]-c_point1[1]])
                                             cv.rectangle(img, p11, p21, (0, 255, 0))
                                             # cv.rectangle(img, p12, p22, (0, 0, 255))
@@ -136,43 +154,64 @@ class TelloNode:
                                                     # del tracker2
                                                     break
                                                 _pose = tmp
-                                                if 50 < abs(c_point1[0] - 480) < 80:
+                                                if 50 < abs(c_point1[0] - 480) < 100:
                                                     if c_point1[0] - 480 < 0:
                                                         _pose[3] = _pose[3] + 5
                                                     else:
                                                         _pose[3] = _pose[3] - 5
                                                         if _pose[3] < 0:
                                                             _pose[3] += 360
-                                                elif 80 < abs(c_point1[0] - 480) < 250:
+                                                        if _pose[3] > 360:
+                                                            _pose[3] -= 360
+                                                elif 100 < abs(c_point1[0] - 480) < 250:
                                                     if c_point1[0] - 480 < 0:
-                                                        _pose[3] = _pose[3] + 13
+                                                        _pose[3] = _pose[3] + 10
                                                     else:
-                                                        _pose[3] = _pose[3] - 13
+                                                        _pose[3] = _pose[3] - 10
                                                         if _pose[3] < 0:
                                                             _pose[3] += 360
+                                                        if _pose[3] > 360:
+                                                            _pose[3] -= 360
                                                 elif abs(c_point1[0] - 480) > 250:
                                                     if c_point1[0] - 480 < 0:
-                                                        _pose[3] = _pose[3] + 20
+                                                        _pose[3] = _pose[3] + 15
                                                     else:
-                                                        _pose[3] = _pose[3] - 20
+                                                        _pose[3] = _pose[3] - 15
                                                         if _pose[3] < 0:
                                                             _pose[3] += 360
+                                                        if _pose[3] > 360:
+                                                            _pose[3] -= 360
                                                 else:
-                                                    if p21[0] - p11[0] < 200:
-                                                        tmp = np.array([55, 0, 0])
-                                                        alpha = _pose[3] * 3.1416 / 180
-                                                        m = np.array([[np.cos(alpha), np.sin(alpha), 0],
-                                                                      [-np.sin(alpha), np.cos(alpha), 0],
-                                                                      [0, 0, 1]])
-                                                        tmp = np.dot(np.linalg.inv(m), tmp)
-                                                        tmp = np.append(tmp, 0)
-                                                        # print(tmp)
-                                                        _pose = _pose + tmp
+                                                    # if p21[1] < 720:
+                                                    #     tmp = np.array([55, 0, 0])
+                                                    #     alpha = _pose[3] * 3.1416 / 180
+                                                    #     m = np.array([[np.cos(alpha), np.sin(alpha), 0],
+                                                    #                   [-np.sin(alpha), np.cos(alpha), 0],
+                                                    #                   [0, 0, 1]])
+                                                    #     tmp = np.dot(np.linalg.inv(m), tmp)
+                                                    #     tmp = np.append(tmp, 0)
+                                                    #     # print(tmp)
+                                                    #     _pose = _pose + tmp
+                                                    # else:
+                                                    tmp = np.array([300, 0, 0])
+                                                    alpha = _pose[3] * 3.1416 / 180
+                                                    m = np.array([[np.cos(alpha), np.sin(alpha), 0],
+                                                                  [-np.sin(alpha), np.cos(alpha), 0],
+                                                                  [0, 0, 1]])
+                                                    tmp = np.dot(np.linalg.inv(m), tmp)
+                                                    tmp = np.append(tmp, 0)
+                                                    # print(tmp)
+                                                    target_pose = _pose + tmp
+                                                    print("in face scan thread, target pose:", target_pose)
+                                                    self.target_pose_event.clear()
+                                                    target_pose = [int(i) for i in target_pose]
+                                                    self.estimate_target_pose.value = ','.join(map(str, target_pose)).encode()
+                                                    self.target_pose_event.set()
                                                 self.update_path_event.clear()
                                                 while self.path.empty() is False:
                                                     self.path.get()
                                                 _pose = [int(i) for i in _pose]
-                                                print(_pose)
+                                                # print(_pose)
                                                 self.path.put(_pose)
                                                 self.update_path_event.set()
                                                 self.scan_face_flag.value = 1
@@ -186,14 +225,18 @@ class TelloNode:
                             self.queue_face.put(img)
                             self.face_point.value = ''.encode()
                             self.scan_face_flag.value = 0
+                            self.estimate_target_pose.value = b''
+
                     else:
                         self.queue_face.put(img)
                         self.scan_face_flag.value = 0
                         self.face_point.value = ''.encode()
+                        self.estimate_target_pose.value = b''
                 except ValueError as e:
                     self.queue_face.put(img)
                     self.face_point.value = ''.encode()
                     self.scan_face_flag.value = 0
+                    self.estimate_target_pose.value = b''
             time.sleep(0.02)
 
     def show_pic(self):
@@ -261,6 +304,9 @@ class TelloNode:
         self.target.value = ','.join(map(str, pose)).encode()
         self.init_pose = pose
         path = np.array(_path)
+        _pose = pose.copy()
+        _pose[2] = 240
+        path = np.insert(path, 0, _pose, axis=0)
         path_x = path[:, 0]
         path_y = path[:, 1]
         path_z = path[:, 2]
@@ -270,7 +316,7 @@ class TelloNode:
             path_y[i] = int(path_y[i])
             path_z[i] = int(path_z[i])
             path_theta[i] = int(path_theta[i])
-        for i in range(4):
+        for i in range(5):
             path_x = path_x.repeat(2)[:-1]
             path_y = path_y.repeat(2)[:-1]
             path_z = path_z.repeat(2)[:-1]
@@ -284,7 +330,7 @@ class TelloNode:
         equdist_waypoint = [[path_x[0]], [path_y[0]], [path_z[0]], [path_theta[0]]]
         for i in range(len(distance)):
             d = distance[i] + d
-            if d >= 50:
+            if d >= 100:
                 equdist_waypoint = np.append(equdist_waypoint,
                                              [[path_x[i]], [path_y[i]], [path_z[i]], [path_theta[i]]])
                 d = 0.0
@@ -310,6 +356,10 @@ class TelloNode:
 
     def update_path(self, path):
         update_path_thread = multiprocessing.Process(target=self._update_path, args=(path,))
+        update_path_thread.start()
+
+    def update_path2(self, path):
+        update_path_thread = multiprocessing.Process(target=self._update_path2, args=(path,))
         update_path_thread.start()
 
     def _update_path(self, path1):
@@ -369,6 +419,75 @@ class TelloNode:
             print('finished updating the path_________________________________', self.tello_ip)
             self.update_path_event.set()
 
+    def _update_path2(self, path1):
+        if self.takeoff_flag.value == 1:
+            pass
+        else:
+            pose = self.pose.get()
+            self.pose.put(pose)
+            v = path1[0][:2] - pose[:2]
+            print("v:", v)
+            cosa = v[0] / np.linalg.norm(v)
+            print("cosa:", cosa)
+            a = -math.acos(cosa)*180/3.1416
+            if a < 0:
+                a += 360
+            print("a:", a)
+            path = np.array(path1)
+            path = np.insert(path, 0, pose, axis=0)
+            path_x = path[:, 0]
+            path_y = path[:, 1]
+            path_z = path[:, 2]
+            path_theta = path[:, 3]
+            for i in range(len(path_x)):
+                path_x[i] = int(path_x[i])
+                path_y[i] = int(path_y[i])
+                path_z[i] = int(path_z[i])
+                # path_theta[i] = int(path_theta[i])
+                path_theta[i] = int(a)
+            for i in range(4):
+                path_x = path_x.repeat(2)[:-1]
+                path_y = path_y.repeat(2)[:-1]
+                path_z = path_z.repeat(2)[:-1]
+                path_theta = path_theta.repeat(2)[:-1]
+                path_x[1::2] = (path_x[2::2] - path_x[1::2]) / 2 + path_x[1::2]
+                path_y[1::2] = (path_y[2::2] - path_y[1::2]) / 2 + path_y[1::2]
+                path_z[1::2] = (path_z[2::2] - path_z[1::2]) / 2 + path_z[1::2]
+                # path_theta[1::2] = (path_theta[2::2] - path_theta[1::2]) / 2 + path_theta[1::2]
+            distance = np.sqrt(np.ediff1d(path_x) ** 2 + np.ediff1d(path_y) ** 2 + np.ediff1d(path_z) ** 2)
+            d = 0.0
+            equdist_waypoint = [[path_x[1]], [path_y[1]], [path_z[1]], [path_theta[1]]]
+            for i in range(len(distance)):
+                d = distance[i] + d
+                if d >= 100:
+                    equdist_waypoint = np.append(equdist_waypoint,
+                                                 [[path_x[i]], [path_y[i]], [path_z[i]], [path_theta[i]]])
+                    d = 0.0
+            equdist_waypoint = np.append(equdist_waypoint, path[-1])
+            path = equdist_waypoint.reshape((-1, 4))
+            self.update_path_event.clear()
+            print('updating the path______________________________________', self.tello_ip)
+            try:
+                tmp = np.array(path[:-3])
+                tmp[-2][3] = tmp[-1][3]
+            except IndexError:
+                tmp = np.array(path)
+            print("update path:", tmp)
+            d = np.array([])
+            for t in tmp:
+                d = np.append(d, np.linalg.norm(np.array(pose[0:3]) - t[0:3], 2))
+            a = np.argmin(d)
+            while self.path.empty() is False:
+                self.path.get()
+            if a >= len(tmp) - 2:
+                for t in tmp:
+                    self.path.put(t)
+            else:
+                for t in tmp[a + 1:]:
+                    self.path.put(t)
+            print('finished updating the path_________________________________', self.tello_ip)
+            self.update_path_event.set()
+
     def _h264_decode(self, packet_data, queue):
         frames = self.h264decoder.decode(packet_data)
         # packet = av.Packet(packet_data)
@@ -391,6 +510,10 @@ class TelloNode:
         # buffer = BytesIO()
         print("receive video thread start....")
         while True:
+            if self.main_flag.value == 1:
+                while self.path.empty() is False:
+                    self.path.get()
+                break
             try:
                 # print("in the receive video thread while loop...")
                 res_string, ip = self.video_socket.recvfrom(2048)
@@ -546,7 +669,7 @@ class TelloNode:
             tmp = np.append(tmp, 0)
             pose = _last_pose + tmp
         elif '>takeoff' in _last_cmd:
-            _last_pose[2] = 100
+            _last_pose[2] = 130
             pose = _last_pose
         elif '>up' in _last_cmd:
             _last_pose[2] += float(_last_cmd.partition(' ')[2])
@@ -583,7 +706,33 @@ class TelloNode:
                     else:
                         print("error:", np.linalg.norm(pose[0:2]-_pose[0:2]))
                         print("_pose: ", _pose)
-                        self.main_flag.value = 1
+                        while self.queue.empty():
+                            time.sleep(0.01)
+                        img = self.queue.get()
+                        # self.queue.put(img)
+                        if img is not None:
+                            _pose, yaw = self.pose_estimater.estimate_pose(img, pose)
+                            # if _pose is not None:
+                            #     print('in img1')
+                            #     while self.queue.empty() is True:
+                            #         time.sleep(0.01)
+                            #     img = self.queue.get()
+                            #     _pose, yaw = self.pose_estimater.estimate_pose(img)
+                            if _pose is not None:
+                                _pose = _pose.reshape(1, -1)[0]
+                                if np.linalg.norm(pose[0:2] - _pose[0:2]) < 200:
+                                    print('in img2, again.')
+                                    pose[0] = int(_pose[0])
+                                    pose[1] = int(_pose[1])
+                                    # if _pose[2] == 0:
+                                    #     pose[2] = _last_pose[2]
+                                    # else:
+                                    #     pose[2] = _pose[2]
+                                    pose[2] = int(_pose[2])
+                                    if yaw < 0:
+                                        yaw += 360
+                                    pose[3] = int(yaw)
+                    # self.main_flag.value = 1
         print('update pose of:', self.tello_ip, pose)
         return pose
 
@@ -616,40 +765,29 @@ class TelloNode:
                 time.sleep(0.1)
             with self.Res_flag.get_lock():
                 self.Res_flag.value = 0
-            # self.cmd_res.get()
-            self.pose.put(self.update_pos('>streamon', self.pose.get()))
-            with self.cmd.get_lock():
-                self.cmd.value = b'>streamon'
-            self.cmd_event.set()
-            while self.Res_flag.value == 0:
-                time.sleep(0.1)
-            with self.Res_flag.get_lock():
-                self.Res_flag.value = 0
             with self.cmd.get_lock():
                 self.cmd.value = b'>takeoff'
             self.cmd_event.set()
             # print('update cmd, >takeoff')
-            self.pose.put(self.update_pos('>takeoff', self.pose.get()))
-            tmp = self.pose.get()
-            self.pose.put(tmp)
-            self.target.value = ','.join(map(str, tmp)).encode()
-            # while self.permission_flag.value == 0:
-            #     # print('wait for permission 1.5,', self.permission_flag.value)
-            #     old_time = time.time()
-            #     # print('wait for permission of ', self.tello_ip, self.permission_flag.value)
-            #     if time.time() - old_time >= 5:
-            #         with self.cmd.get_lock():
-            #             self.cmd.value = b'>command'
-            #         self.cmd_event.set()
-            #     time.sleep(0.2)
-            # self.permission_flag.value = 0
             while self.Res_flag.value == 0:
                 time.sleep(0.1)
             with self.Res_flag.get_lock():
                 self.Res_flag.value = 0
-            self.pose.put(self.update_pos('>up 130', self.pose.get()))
+            self.pose.put(self.update_pos('>takeoff', self.pose.get()))
+            tmp = self.pose.get()
+            self.pose.put(tmp)
+            self.target.value = ','.join(map(str, tmp)).encode()
             with self.cmd.get_lock():
                 self.cmd.value = b'>up 100'
+            self.cmd_event.set()
+            while self.Res_flag.value == 0:
+                time.sleep(0.1)
+            with self.Res_flag.get_lock():
+                self.Res_flag.value = 0
+            self.pose.put(self.update_pos('>up 100', self.pose.get()))
+            # self.cmd_res.get()
+            with self.cmd.get_lock():
+                self.cmd.value = b'>streamon'
             self.cmd_event.set()
             # print('update cmd, >up 130')
             while self.Res_flag.value == 0:
@@ -661,6 +799,8 @@ class TelloNode:
             with self.cmd.get_lock():
                 self.cmd.value = b'>command'
             self.cmd_event.set()
+            time.sleep(3)
+            self.pose.put(self.update_pos('>command', self.pose.get()))
             # old_time = time.time()
             # while self.Res_flag.value == 0:
             #     if time.time() - old_time > 5:
@@ -726,6 +866,8 @@ class TelloNode:
                 time.sleep(0.2)
             self.permission_flag.value = 0
             old_time = time.time()
+            if self.main_flag.value == 1:
+                break
             while self.Res_flag.value == 0:
                 if time.time() - old_time > 5:
                     with self.cmd.get_lock():
@@ -803,7 +945,7 @@ class TelloNode:
             self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
             pose = self.pose.get()
             self.pose.put(pose)
-            print("before turn , pose:{}, target:{}", pose, target)
+            # print("before turn , pose:{}, target:{}", pose, target)
             theta = target[3] - pose[3]
             if abs(theta) >= 3:
                 if theta < 0:
@@ -844,6 +986,8 @@ class TelloNode:
                     self.cmd.value = ('>' + cmd).encode()
                 self.cmd_event.set()
             time.sleep(0.1)
+            if self.main_flag.value == 1:
+                break
         while self.Res_flag.value == 0:
             time.sleep(0.1)
             if self.main_flag.value == 1:
