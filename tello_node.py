@@ -765,7 +765,8 @@ class TelloNode:
             with self.Res_flag.get_lock():
                 self.Res_flag.value = 0
             with self.cmd.get_lock():
-                self.cmd.value = b'>takeoff'
+                # self.cmd.value = b'>takeoff'
+                self.cmd.value = b'>command'
             self.cmd_event.set()
             # print('update cmd, >takeoff')
             while self.Res_flag.value == 0:

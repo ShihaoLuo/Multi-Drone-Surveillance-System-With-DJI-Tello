@@ -13,7 +13,7 @@ import ctypes
 
 
 class Scanner:
-    def __init__(self):
+    def __init__(self, subnet):
         self.host_ip = None
         self.local_ip = ''
         self.local_port = 8889
@@ -28,6 +28,7 @@ class Scanner:
         self.receive_thread.setDaemon(True)
         self.receive_thread.start()
         self.tello_info = []
+        self.subnet = subnet
 
     def get_host_ip(self):
         _s = None
@@ -42,7 +43,7 @@ class Scanner:
         print('[Start_Searching]Searching for %s available Tello...\n' % num)
         possible_addr = []
         for i in range(100, 200, 1):
-            possible_addr.append('192.168.50.'+str(i))
+            possible_addr.append(self.subnet+str(i))
         while len(self.tello_ip_list) < num:
             print('[Still_Searching]Trying to find Tello in subnets...\n')
             for tello_ip in self.tello_ip_list:
