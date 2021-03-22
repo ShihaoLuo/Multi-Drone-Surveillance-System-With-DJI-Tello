@@ -1,0 +1,122 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2021-03-21 18:24:47.000931
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2021-03-21 18:24:49.004141
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: None
+start time: 2021-03-21 18:24:51.008118
+end_time: None
+duration: None
+
+id: 3
+command: command
+response: b'ok'
+start time: 2021-03-21 18:24:53.011963
+end_time: 2021-03-21 18:24:53.518981
+duration: 0.507018
+
+id: 4
+command: battery?
+response: b'81\r\n'
+start time: 2021-03-21 18:24:55.020677
+end_time: 2021-03-21 18:24:55.063387
+duration: 0.04271
+
+id: 5
+command: sn?
+response: b'0TQDG43EDB14KM'
+start time: 2021-03-21 18:24:57.579420
+end_time: 2021-03-21 18:24:57.617905
+duration: 0.038485
+
+id: 6
+command: setfps high
+response: b'ok'
+start time: 2021-03-21 18:25:00.355801
+end_time: 2021-03-21 18:25:00.377138
+duration: 0.021337
+
+id: 7
+command: setresolution high
+response: b'ok'
+start time: 2021-03-21 18:25:01.382554
+end_time: 2021-03-21 18:25:01.447847
+duration: 0.065293
+
+id: 8
+command: setbitrate 5
+response: b'ok'
+start time: 2021-03-21 18:25:02.424386
+end_time: 2021-03-21 18:25:02.468730
+duration: 0.044344
+
+id: 9
+command: streamon
+response: b'ok'
+start time: 2021-03-21 18:25:03.456182
+end_time: 2021-03-21 18:25:03.489106
+duration: 0.032924
+
+id: 10
+command: takeoff
+response: b'ok'
+start time: 2021-03-21 18:25:04.503108
+end_time: 2021-03-21 18:25:08.492215
+duration: 3.989107
+
+id: 11
+command: up 70
+response: b'ok'
+start time: 2021-03-21 18:25:08.522984
+end_time: 2021-03-21 18:25:10.935777
+duration: 2.412793
+
+id: 12
+command: back 50
+response: b'ok'
+start time: 2021-03-21 18:25:10.971612
+end_time: 2021-03-21 18:25:13.397495
+duration: 2.425883
+
+id: 13
+command: command
+response: b'ok'
+start time: 2021-03-21 18:25:13.621223
+end_time: 2021-03-21 18:25:13.654746
+duration: 0.033523
+
+id: 14
+command: command
+response: b'ok'
+start time: 2021-03-21 18:25:15.659059
+end_time: 2021-03-21 18:25:15.694037
+duration: 0.034978
+
+id: 15
+command: command
+response: b'ok'
+start time: 2021-03-21 18:25:16.891820
+end_time: 2021-03-21 18:25:16.913252
+duration: 0.021432
+
+id: 16
+command: back 50
+response: b'ok'
+start time: 2021-03-21 18:25:18.934733
+end_time: 2021-03-21 18:25:21.608657
+duration: 2.673924
+

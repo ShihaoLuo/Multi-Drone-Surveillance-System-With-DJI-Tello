@@ -38,7 +38,7 @@ def scheduler(tello_node, permission_flag):
                         pass
                     else:
                         d = np.linalg.norm(np.array(target[key][0:2]) - np.array(target[key2][0:2]), 2)
-                        if d <= 160:
+                        if d <= 150:
                             tmp.append(key2)
                 if len(tmp) == 0:
                     permission_list.append(key)
@@ -130,7 +130,7 @@ Node = {}
 Res_flag = {}
 Permission_flag = {}
 Target = {}
-scanner = Scanner('192.168.1.')
+scanner = Scanner('192.168.50.')
 scanner.find_available_tello(num)
 tello_list = scanner.get_tello_info()
 main_thread_flag = multiprocessing.Value('i', 0)

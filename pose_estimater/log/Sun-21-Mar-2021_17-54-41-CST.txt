@@ -1,0 +1,73 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2021-03-21 17:54:41.283693
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: b'ok'
+start time: 2021-03-21 17:54:43.286437
+end_time: 2021-03-21 17:54:43.838450
+duration: 0.552013
+
+id: 2
+command: battery?
+response: b'47\r\n'
+start time: 2021-03-21 17:54:45.293062
+end_time: 2021-03-21 17:54:45.324209
+duration: 0.031147
+
+id: 3
+command: sn?
+response: b'0TQDG43EDB8YQ9'
+start time: 2021-03-21 17:54:47.836080
+end_time: 2021-03-21 17:54:47.883471
+duration: 0.047391
+
+id: 4
+command: setfps high
+response: b'ok'
+start time: 2021-03-21 17:54:50.683951
+end_time: 2021-03-21 17:54:50.731127
+duration: 0.047176
+
+id: 5
+command: setresolution high
+response: b'ok'
+start time: 2021-03-21 17:54:51.715794
+end_time: 2021-03-21 17:54:51.751043
+duration: 0.035249
+
+id: 6
+command: setbitrate 5
+response: b'ok'
+start time: 2021-03-21 17:54:52.747565
+end_time: 2021-03-21 17:54:52.769390
+duration: 0.021825
+
+id: 7
+command: streamon
+response: b'ok'
+start time: 2021-03-21 17:54:53.779372
+end_time: 2021-03-21 17:54:53.795025
+duration: 0.015653
+
+id: 8
+command: takeoff
+response: b'ok'
+start time: 2021-03-21 17:54:54.806108
+end_time: 2021-03-21 17:55:02.162267
+duration: 7.356159
+
+id: 9
+command: up 100
+response: None
+start time: 2021-03-21 17:55:02.187941
+end_time: None
+duration: None
+

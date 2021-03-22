@@ -1,0 +1,101 @@
+------
+Drone: 1
+
+id: 0
+command: command
+response: None
+start time: 2021-03-21 18:08:43.222317
+end_time: None
+duration: None
+
+id: 1
+command: command
+response: None
+start time: 2021-03-21 18:08:45.223552
+end_time: None
+duration: None
+
+id: 2
+command: command
+response: None
+start time: 2021-03-21 18:08:47.227345
+end_time: None
+duration: None
+
+id: 3
+command: command
+response: None
+start time: 2021-03-21 18:08:49.231415
+end_time: None
+duration: None
+
+id: 4
+command: command
+response: None
+start time: 2021-03-21 18:08:51.235292
+end_time: None
+duration: None
+
+id: 5
+command: command
+response: b'ok'
+start time: 2021-03-21 18:08:53.239368
+end_time: 2021-03-21 18:08:53.782140
+duration: 0.542772
+
+id: 6
+command: battery?
+response: b'55\r\n'
+start time: 2021-03-21 18:08:55.248615
+end_time: 2021-03-21 18:08:55.290791
+duration: 0.042176
+
+id: 7
+command: sn?
+response: b'0TQDG43EDB8YQ9'
+start time: 2021-03-21 18:08:57.792055
+end_time: 2021-03-21 18:08:57.818380
+duration: 0.026325
+
+id: 8
+command: setfps high
+response: b'ok'
+start time: 2021-03-21 18:09:00.643778
+end_time: 2021-03-21 18:09:00.677596
+duration: 0.033818
+
+id: 9
+command: setresolution high
+response: b'ok'
+start time: 2021-03-21 18:09:01.670541
+end_time: 2021-03-21 18:09:01.694472
+duration: 0.023931
+
+id: 10
+command: setbitrate 5
+response: b'ok'
+start time: 2021-03-21 18:09:02.712363
+end_time: 2021-03-21 18:09:02.770390
+duration: 0.058027
+
+id: 11
+command: streamon
+response: b'ok'
+start time: 2021-03-21 18:09:03.739112
+end_time: 2021-03-21 18:09:03.787253
+duration: 0.048141
+
+id: 12
+command: takeoff
+response: b'ok'
+start time: 2021-03-21 18:09:04.780805
+end_time: 2021-03-21 18:09:06.747585
+duration: 1.96678
+
+id: 13
+command: up 70
+response: b'error Motor stop'
+start time: 2021-03-21 18:09:06.778215
+end_time: 2021-03-21 18:09:06.853033
+duration: 0.074818
+

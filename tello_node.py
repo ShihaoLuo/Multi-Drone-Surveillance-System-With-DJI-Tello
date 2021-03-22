@@ -77,6 +77,9 @@ class TelloNode:
                 encode = np.load(_dataset_path+dir+'/'+dir+'.npy')
                 _dataset = dict()
                 _dataset['encode'] = encode
+                t = cv.imread(_dataset_path+dir+'/'+dir+'.jpg')
+                img = cv.resize(t, (200, int(t.shape[0] * 200 / t.shape[1])), interpolation=cv.INTER_AREA)
+                _dataset['img'] = img
                 self.target_dataset[dir] = _dataset
         print(self.target_dataset)
 
@@ -123,11 +126,12 @@ class TelloNode:
                     if len(locate) != 0:
                         unknown_image = face_recognition.face_encodings(img, locate)[0]
                         for i in data.keys():
-                            result = face_recognition.compare_faces([data[i]], unknown_image)
-                            if result is True:
+                            result = face_recognition.compare_faces([data[i]['encode']], unknown_image)[0]
+                            if result == True:
                                 name = i
+                                img_target = data[i]['img']
                                 break
-                        if result is True:
+                        if result == True:
                             p1 = (locate[0][3], locate[0][0])
                             p2 = (locate[0][1], locate[0][2])
                             # print(p1, p2)
@@ -135,7 +139,11 @@ class TelloNode:
                             h = p2[1] - p1[1]
                             p1 = (int(p1[0]-1.25*w), int(p1[1]-h))
                             p2 = (int(p2[0]+1.25*w), int(p2[1]+4*h))
+                            img[0:img_target.shape[0], 0:img_target.shape[1]] = img_target
                             cv.rectangle(img, p1, p2, (0, 255, 0))
+                            # print(name)
+                            cv.putText(img, name, (p1[0], int(p1[1] - 0.2*h)), cv.FONT_HERSHEY_TRIPLEX, 0.75, (255, 0, 0))
+                            # print('put name ok.')
                             self.queue_face.put(img)
                             # c_point = np.array([int(locate[0][0]/2+locate[0][2]/2), int(locate[0][1]/2+locate[0][3]/2)])
                             # self.face_point.value = ','.join(map(str, locate[0])).encode()
@@ -162,9 +170,11 @@ class TelloNode:
                                             c_point1 = (p11[0] / 2 + p21[0] / 2, p11[1] / 2 + p21[1] / 2)
                                             # c_point2 = (p12[0] / 2 + p22[0] / 2, p12[1] / 2 + p22[1] / 2)
                                             # print("tracker need {}s".format(time.time()-old))
-                                            if ok1 and p21[0]<960 and p21[1]<720+4*h and p11[0]>0 and p11[1]>0:
+                                            if ok1 and p21[0]<960 + w and p21[1]<720+4*h and p11[0]>-w and p11[1]>-h:
                                             # d = np.linalg.norm([c_point2[0]-c_point1[0], c_point2[1]-c_point1[1]])
+                                                img[0:img_target.shape[0], 0:img_target.shape[1]] = img_target
                                                 cv.rectangle(img, p11, p21, (0, 255, 0))
+                                                cv.putText(img, name, (p11[0], int(p11[1] - 0.2*h)), cv.FONT_HERSHEY_TRIPLEX, 0.75, (255, 0, 0))
                                                 # cv.rectangle(img, p12, p22, (0, 0, 255))
                                                 self.queue_face.put(img)
                                                 # if time.time() - old > 1:
@@ -251,7 +261,7 @@ class TelloNode:
                                                 break
                                         time.sleep(0.01)
                             except Exception as e:
-                                print("get img, but not into tracker thread.")
+                                print("-----------------------------{}\n\n\n\n------------------".format(e))
                                 self.queue_face.put(img)
                                 self.face_point.value = ''.encode()
                                 self.scan_face_flag.value = 0
@@ -267,7 +277,7 @@ class TelloNode:
                         self.face_point.value = ''.encode()
                         self.estimate_target_pose.value = b''
                 except ValueError as e:
-                    print(e)
+                    print("-----------------------------{}\n\n\n\n------------------".format(e))
                     self.queue_face.put(img)
                     self.face_point.value = ''.encode()
                     self.scan_face_flag.value = 0
@@ -277,13 +287,12 @@ class TelloNode:
     def show_pic(self):
         # frame_dict = {}.fromkeys(self.tello_ip_list,bytes())
         print("show pic thread start.\n")
-        # cv.namedWindow(self.tello_ip, cv.WINDOW_NORMAL)
         while True:
             if self.main_flag.value == 1:
                 while self.path.empty() is False:
                     self.path.get()
                 break
-            a = cv.waitKey(2)
+            a = cv.waitKey(1)
             if a == ord('q'):
                 cv.destroyAllWindows()
                 break
@@ -353,7 +362,7 @@ class TelloNode:
             path_y[i] = int(path_y[i])
             path_z[i] = int(path_z[i])
             path_theta[i] = int(path_theta[i])
-        for i in range(5):
+        for i in range(3):
             path_x = path_x.repeat(2)[:-1]
             path_y = path_y.repeat(2)[:-1]
             path_z = path_z.repeat(2)[:-1]
@@ -417,7 +426,7 @@ class TelloNode:
                 path_y[i] = int(path_y[i])
                 path_z[i] = int(path_z[i])
                 path_theta[i] = int(path_theta[i])
-            for i in range(4):
+            for i in range(3):
                 path_x = path_x.repeat(2)[:-1]
                 path_y = path_y.repeat(2)[:-1]
                 path_z = path_z.repeat(2)[:-1]
@@ -805,7 +814,7 @@ class TelloNode:
                 self.Res_flag.value = 0
             with self.cmd.get_lock():
                 # self.cmd.value = b'>takeoff'
-                self.cmd.value = b'>command'
+                self.cmd.value = b'>takeoff'
             self.cmd_event.set()
             # print('update cmd, >takeoff')
             while self.Res_flag.value == 0:
