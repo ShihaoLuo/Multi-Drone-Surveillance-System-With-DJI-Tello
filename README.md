@@ -1,6 +1,6 @@
 # tello_project
 install opencv:
-  pip install opencv-contrib-python==4.3.0.36
-  
+  pip install opencv-contrib-python==3.4.13.47
+
 v3.1:
   adding target identification;
