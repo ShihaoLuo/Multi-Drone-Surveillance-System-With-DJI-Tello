@@ -66,6 +66,20 @@ class TelloNode:
         self.face_detected_pose = multiprocessing.Array('c', 40)
         self.face_path = multiprocessing.Queue()
         self.estimate_target_pose = multiprocessing.Array('c', 30)
+        self.target_dataset = dict()
+        self.loaddata('./target_images/')
+
+
+    def loaddata(self, _dataset_path):
+        listdir = os.listdir(_dataset_path)
+        for dir in listdir:
+            if os.path.isdir(_dataset_path+dir):
+                encode = np.load(_dataset_path+dir+'/'+dir+'.npy')
+                _dataset = dict()
+                _dataset['encode'] = encode
+                self.target_dataset[dir] = _dataset
+        print(self.target_dataset)
+
 
     def get_face_flag(self):
         return self.scan_face_flag.value
@@ -86,13 +100,16 @@ class TelloNode:
 
     def scan_face(self):
         print('scan face thread start....')
+        data = self.target_dataset
         while True:
+            result = False
+            name = ''
             if self.main_flag.value == 1:
                 break
             if self.queue.empty() is False:
                 img = self.queue.get()
                 img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-                old = time.time()
+                # old = time.time()
                 # time1 = time.time()
                 # pose = self.pose.get()
                 # self.pose.put(pose)
@@ -104,135 +121,146 @@ class TelloNode:
                 # print(locate)
                 try:
                     if len(locate) != 0:
-                        p1 = (locate[0][3], locate[0][0])
-                        p2 = (locate[0][1], locate[0][2])
-                        # print(p1, p2)
-                        w = p2[0] - p1[0]
-                        h = p2[1] - p1[1]
-                        p1 = (int(p1[0]-1.25*w), int(p1[1]-h))
-                        p2 = (int(p2[0]+1.25*w), int(p2[1]+4*h))
-                        cv.rectangle(img, p1, p2, (0, 255, 0))
-                        self.queue_face.put(img)
-                        # c_point = np.array([int(locate[0][0]/2+locate[0][2]/2), int(locate[0][1]/2+locate[0][3]/2)])
-                        # self.face_point.value = ','.join(map(str, locate[0])).encode()
-                        tracker1 = cv.TrackerCSRT_create()
-                        # print("create tracker:", tracker1)
-                        # tracker2 = cv.TrackerCSRT_create()
-                        try:
-                            bbox = (p1[0], p1[1], p2[0]-p1[0], p2[1]-p1[1])
-                            # print(bbox)
-                            ok1 = tracker1.init(img, bbox)
-                            # print("ok1:", ok1)
-                            # ok2 = tracker2.init(img, (p1[0], p1[1], p2[0] - p1[0], p2[1] - p1[1]))
-                            if ok1:
-                                while True:
-                                    if self.queue.empty() is False:
-                                        img = self.queue.get()
-                                        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-                                        ok1, bbox1 = tracker1.update(img)
-                                        p11 = (int(bbox1[0]), int(bbox1[1]))
-                                        p21 = (int(bbox1[0] + bbox1[2]), int(bbox1[1] + bbox1[3]))
-                                        # ok2, bbox2 = tracker2.update(img)
-                                        # p12 = (int(bbox2[0]), int(bbox2[1]))
-                                        # p22 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
-                                        c_point1 = (p11[0] / 2 + p21[0] / 2, p11[1] / 2 + p21[1] / 2)
-                                        # c_point2 = (p12[0] / 2 + p22[0] / 2, p12[1] / 2 + p22[1] / 2)
-                                        # print("tracker need {}s".format(time.time()-old))
-                                        if ok1 and p21[0]<960 and p21[1]<720+4*h and p11[0]>0 and p11[1]>0:
-                                        # d = np.linalg.norm([c_point2[0]-c_point1[0], c_point2[1]-c_point1[1]])
-                                            cv.rectangle(img, p11, p21, (0, 255, 0))
-                                            # cv.rectangle(img, p12, p22, (0, 0, 255))
-                                            self.queue_face.put(img)
-                                            # if time.time() - old > 1:
-                                            if self.Res_flag.value == 1:
-                                                time.sleep(0.08)
-                                                # c_point = (p11[0]/2+p21[0]/2, p11[1]/2+p21[1]/2)
-                                                # print("c_point:", c_point)
-                                                # _pose = self.pose.get()
-                                                tmp = self.target.value
-                                                tmp = tmp.decode().split(',')
-                                                try:
-                                                    tmp = list(map(int, tmp))
-                                                except ValueError as e:
-                                                    print("error tm value.", tmp)
-                                                    del tracker1
-                                                    # del tracker2
-                                                    break
-                                                _pose = tmp
-                                                if 50 < abs(c_point1[0] - 480) < 100:
-                                                    if c_point1[0] - 480 < 0:
-                                                        _pose[3] = _pose[3] + 5
-                                                    else:
-                                                        _pose[3] = _pose[3] - 5
-                                                        if _pose[3] < 0:
-                                                            _pose[3] += 360
-                                                        if _pose[3] > 360:
-                                                            _pose[3] -= 360
-                                                elif 100 < abs(c_point1[0] - 480) < 250:
-                                                    if c_point1[0] - 480 < 0:
-                                                        _pose[3] = _pose[3] + 10
-                                                    else:
-                                                        _pose[3] = _pose[3] - 10
-                                                        if _pose[3] < 0:
-                                                            _pose[3] += 360
-                                                        if _pose[3] > 360:
-                                                            _pose[3] -= 360
-                                                elif abs(c_point1[0] - 480) > 250:
-                                                    if c_point1[0] - 480 < 0:
-                                                        _pose[3] = _pose[3] + 15
-                                                    else:
-                                                        _pose[3] = _pose[3] - 15
-                                                        if _pose[3] < 0:
-                                                            _pose[3] += 360
-                                                        if _pose[3] > 360:
-                                                            _pose[3] -= 360
-                                                else:
-                                                    # if p21[1] < 720:
-                                                    #     tmp = np.array([55, 0, 0])
-                                                    #     alpha = _pose[3] * 3.1416 / 180
-                                                    #     m = np.array([[np.cos(alpha), np.sin(alpha), 0],
-                                                    #                   [-np.sin(alpha), np.cos(alpha), 0],
-                                                    #                   [0, 0, 1]])
-                                                    #     tmp = np.dot(np.linalg.inv(m), tmp)
-                                                    #     tmp = np.append(tmp, 0)
-                                                    #     # print(tmp)
-                                                    #     _pose = _pose + tmp
-                                                    # else:
-                                                    tmp = np.array([350, 0, 0])
-                                                    alpha = _pose[3] * 3.1416 / 180
-                                                    m = np.array([[np.cos(alpha), np.sin(alpha), 0],
-                                                                  [-np.sin(alpha), np.cos(alpha), 0],
-                                                                  [0, 0, 1]])
-                                                    tmp = np.dot(np.linalg.inv(m), tmp)
-                                                    tmp = np.append(tmp, 0)
-                                                    # print(tmp)
-                                                    target_pose = _pose + tmp
-                                                    print("in face scan thread, target pose:", target_pose)
-                                                    self.target_pose_event.clear()
-                                                    target_pose = [int(i) for i in target_pose]
-                                                    self.estimate_target_pose.value = ','.join(map(str, target_pose)).encode()
-                                                    self.target_pose_event.set()
-                                                self.update_path_event.clear()
-                                                while self.path.empty() is False:
-                                                    self.path.get()
-                                                _pose = [int(i) for i in _pose]
-                                                # print(_pose)
-                                                self.path.put(_pose)
-                                                self.update_path_event.set()
-                                                self.scan_face_flag.value = 1
-                                                # old = time.time()
-                                        else:
-                                            del tracker1
-                                            # del tracker2
-                                            break
-                                    time.sleep(0.01)
-                        except Exception as e:
-                            print("get img, but not into tracker thread.")
+                        unknown_image = face_recognition.face_encodings(img, locate)[0]
+                        for i in data.keys():
+                            result = face_recognition.compare_faces([data[i]], unknown_image)
+                            if result is True:
+                                name = i
+                                break
+                        if result is True:
+                            p1 = (locate[0][3], locate[0][0])
+                            p2 = (locate[0][1], locate[0][2])
+                            # print(p1, p2)
+                            w = p2[0] - p1[0]
+                            h = p2[1] - p1[1]
+                            p1 = (int(p1[0]-1.25*w), int(p1[1]-h))
+                            p2 = (int(p2[0]+1.25*w), int(p2[1]+4*h))
+                            cv.rectangle(img, p1, p2, (0, 255, 0))
                             self.queue_face.put(img)
-                            self.face_point.value = ''.encode()
+                            # c_point = np.array([int(locate[0][0]/2+locate[0][2]/2), int(locate[0][1]/2+locate[0][3]/2)])
+                            # self.face_point.value = ','.join(map(str, locate[0])).encode()
+                            tracker1 = cv.TrackerCSRT_create()
+                            # print("create tracker:", tracker1)
+                            # tracker2 = cv.TrackerCSRT_create()
+                            try:
+                                bbox = (p1[0], p1[1], p2[0]-p1[0], p2[1]-p1[1])
+                                # print(bbox)
+                                ok1 = tracker1.init(img, bbox)
+                                # print("ok1:", ok1)
+                                # ok2 = tracker2.init(img, (p1[0], p1[1], p2[0] - p1[0], p2[1] - p1[1]))
+                                if ok1:
+                                    while True:
+                                        if self.queue.empty() is False:
+                                            img = self.queue.get()
+                                            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+                                            ok1, bbox1 = tracker1.update(img)
+                                            p11 = (int(bbox1[0]), int(bbox1[1]))
+                                            p21 = (int(bbox1[0] + bbox1[2]), int(bbox1[1] + bbox1[3]))
+                                            # ok2, bbox2 = tracker2.update(img)
+                                            # p12 = (int(bbox2[0]), int(bbox2[1]))
+                                            # p22 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
+                                            c_point1 = (p11[0] / 2 + p21[0] / 2, p11[1] / 2 + p21[1] / 2)
+                                            # c_point2 = (p12[0] / 2 + p22[0] / 2, p12[1] / 2 + p22[1] / 2)
+                                            # print("tracker need {}s".format(time.time()-old))
+                                            if ok1 and p21[0]<960 and p21[1]<720+4*h and p11[0]>0 and p11[1]>0:
+                                            # d = np.linalg.norm([c_point2[0]-c_point1[0], c_point2[1]-c_point1[1]])
+                                                cv.rectangle(img, p11, p21, (0, 255, 0))
+                                                # cv.rectangle(img, p12, p22, (0, 0, 255))
+                                                self.queue_face.put(img)
+                                                # if time.time() - old > 1:
+                                                if self.Res_flag.value == 1:
+                                                    time.sleep(0.08)
+                                                    # c_point = (p11[0]/2+p21[0]/2, p11[1]/2+p21[1]/2)
+                                                    # print("c_point:", c_point)
+                                                    # _pose = self.pose.get()
+                                                    tmp = self.target.value
+                                                    tmp = tmp.decode().split(',')
+                                                    try:
+                                                        tmp = list(map(int, tmp))
+                                                    except ValueError as e:
+                                                        print("error tm value.", tmp)
+                                                        del tracker1
+                                                        # del tracker2
+                                                        break
+                                                    _pose = tmp
+                                                    if 50 < abs(c_point1[0] - 480) < 100:
+                                                        if c_point1[0] - 480 < 0:
+                                                            _pose[3] = _pose[3] + 5
+                                                        else:
+                                                            _pose[3] = _pose[3] - 5
+                                                            if _pose[3] < 0:
+                                                                _pose[3] += 360
+                                                            if _pose[3] > 360:
+                                                                _pose[3] -= 360
+                                                    elif 100 < abs(c_point1[0] - 480) < 250:
+                                                        if c_point1[0] - 480 < 0:
+                                                            _pose[3] = _pose[3] + 10
+                                                        else:
+                                                            _pose[3] = _pose[3] - 10
+                                                            if _pose[3] < 0:
+                                                                _pose[3] += 360
+                                                            if _pose[3] > 360:
+                                                                _pose[3] -= 360
+                                                    elif abs(c_point1[0] - 480) > 250:
+                                                        if c_point1[0] - 480 < 0:
+                                                            _pose[3] = _pose[3] + 15
+                                                        else:
+                                                            _pose[3] = _pose[3] - 15
+                                                            if _pose[3] < 0:
+                                                                _pose[3] += 360
+                                                            if _pose[3] > 360:
+                                                                _pose[3] -= 360
+                                                    else:
+                                                        # if p21[1] < 720:
+                                                        #     tmp = np.array([55, 0, 0])
+                                                        #     alpha = _pose[3] * 3.1416 / 180
+                                                        #     m = np.array([[np.cos(alpha), np.sin(alpha), 0],
+                                                        #                   [-np.sin(alpha), np.cos(alpha), 0],
+                                                        #                   [0, 0, 1]])
+                                                        #     tmp = np.dot(np.linalg.inv(m), tmp)
+                                                        #     tmp = np.append(tmp, 0)
+                                                        #     # print(tmp)
+                                                        #     _pose = _pose + tmp
+                                                        # else:
+                                                        tmp = np.array([350, 0, 0])
+                                                        alpha = _pose[3] * 3.1416 / 180
+                                                        m = np.array([[np.cos(alpha), np.sin(alpha), 0],
+                                                                      [-np.sin(alpha), np.cos(alpha), 0],
+                                                                      [0, 0, 1]])
+                                                        tmp = np.dot(np.linalg.inv(m), tmp)
+                                                        tmp = np.append(tmp, 0)
+                                                        # print(tmp)
+                                                        target_pose = _pose + tmp
+                                                        print("in face scan thread, target pose:", target_pose)
+                                                        self.target_pose_event.clear()
+                                                        target_pose = [int(i) for i in target_pose]
+                                                        self.estimate_target_pose.value = ','.join(map(str, target_pose)).encode()
+                                                        self.target_pose_event.set()
+                                                    self.update_path_event.clear()
+                                                    while self.path.empty() is False:
+                                                        self.path.get()
+                                                    _pose = [int(i) for i in _pose]
+                                                    # print(_pose)
+                                                    self.path.put(_pose)
+                                                    self.update_path_event.set()
+                                                    self.scan_face_flag.value = 1
+                                                    # old = time.time()
+                                            else:
+                                                del tracker1
+                                                # del tracker2
+                                                break
+                                        time.sleep(0.01)
+                            except Exception as e:
+                                print("get img, but not into tracker thread.")
+                                self.queue_face.put(img)
+                                self.face_point.value = ''.encode()
+                                self.scan_face_flag.value = 0
+                                self.estimate_target_pose.value = b''
+                        else:
+                            self.queue_face.put(img)
                             self.scan_face_flag.value = 0
+                            self.face_point.value = ''.encode()
                             self.estimate_target_pose.value = b''
-
                     else:
                         self.queue_face.put(img)
                         self.scan_face_flag.value = 0
@@ -777,7 +805,7 @@ class TelloNode:
                 self.Res_flag.value = 0
             with self.cmd.get_lock():
                 # self.cmd.value = b'>takeoff'
-                self.cmd.value = b'>takeoff'
+                self.cmd.value = b'>command'
             self.cmd_event.set()
             # print('update cmd, >takeoff')
             while self.Res_flag.value == 0:
