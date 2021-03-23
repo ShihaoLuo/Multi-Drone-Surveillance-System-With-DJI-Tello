@@ -43,11 +43,13 @@ class TelloNode:
         if show_match_flag == 1:
             self.pose_estimater.show_match_start()
         self.path = multiprocessing.Queue()
+        self.manual_command = multiprocessing.Queue()
         self.video_flag = 1
         self.run_thread_flag = multiprocessing.Value('i', 0)
         self.path_empty_flag = multiprocessing.Value('i', 0)
         self.update_path_flag = multiprocessing.Value('i', 0)
-        self.takeoff_flag = multiprocessing.Value('i', 1)
+        self.takeoff_flag = multiprocessing.Value('i', 0)
+        self.takeoff_command = multiprocessing.Value('i', 0)
         self.Res_flag = res_flag
         self.cmd = multiprocessing.Array('c', 30)
         self.cmd_event = multiprocessing.Event()
@@ -69,6 +71,11 @@ class TelloNode:
         self.target_dataset = dict()
         self.loaddata('./target_images/')
 
+    def command(self, cmd):
+        self.manual_command.put(cmd)
+
+    def takeoff(self):
+        self.takeoff_command.value = 1
 
     def loaddata(self, _dataset_path):
         listdir = os.listdir(_dataset_path)
@@ -409,7 +416,7 @@ class TelloNode:
         update_path_thread.start()
 
     def _update_path(self, path1):
-        if self.takeoff_flag.value == 1:
+        if self.takeoff_flag.value == 0:
             pass
         else:
             pose = self.pose.get()
@@ -467,7 +474,7 @@ class TelloNode:
             self.update_path_event.set()
 
     def _update_path2(self, path1):
-        if self.takeoff_flag.value == 1:
+        if self.takeoff_flag.value == 0:
             pass
         else:
             pose = self.pose.get()
@@ -626,43 +633,6 @@ class TelloNode:
         self.cmd_event.set()
         self.update_path_event.set()
         while True:
-            # if time.time() - old_time > 10 and self.takeoff_flag.value == 0:
-            #     # self.thread_list = psutil.pids()
-            #     # if video_thread.pid not in self.thread_list:
-            #     #     print("video thread pid not in the list, restart thread.")
-            #     #     video_thread.start()
-            #     #     print("new video pid of {} is {}".format(self.tello_ip, video_thread.pid))
-            #     # else:
-            #     #     print("video thread pid {} in the list".format(video_thread.pid))
-            #     # test_list = []
-            #     # for i in range(10):
-            #     #     p_cpu = p.cpu_percent(interval=0.1)
-            #     #     test_list.append(p_cpu)
-            #     # per = sum(test_list)/len(test_list)
-            #     # if last_per == 0 and per == 0:
-            #     #     print("Kill the video thread.")
-            #     #     os.kill(video_thread.pid, signal.SIGKILL)
-            #     #     print("restart video thread.")
-            #     #     video_thread = multiprocessing.Process(target=self._receive_video_thread)
-            #     #     video_thread.start()
-            #     #     print("new video thread pid:", video_thread.pid)
-            #     #     last_per = 1
-            #     # else:
-            #     #     last_per = per
-            #     # print("Process {}: cpu percent:{}".format(video_thread.pid, sum(test_list)/len(test_list)))
-            #     p = psutil.Process(video_thread.pid)
-            #     info = p.memory_full_info()
-            #     memory = info.uss/1024./1024./1024.
-            #     print("memory used by {}:{}g".format(self.tello_ip, memory))
-            #     if memory > 3:
-            #         for child in p.children(recursive=True):
-            #             child.kill()
-            #         p.kill()  ## this program
-            #         video_thread = multiprocessing.Process(target=self._receive_video_thread, args=(self.queue,))
-            #         video_thread.start()
-            #         os.system("taskset -cp 12,15 " + str(video_thread.pid))
-            #         print("new video pid of {} is {}".format(self.tello_ip, video_thread.pid))
-            #     old_time = time.time()
             if self.run_thread_flag.value == 1 or self.main_flag.value == 1:
                 time.sleep(1)
                 break
@@ -671,6 +641,7 @@ class TelloNode:
             with self.cmd.get_lock():
                 cmd = self.cmd.value.decode()
             self.send_command(cmd)
+            print('send ', cmd)
             if 'm' not in cmd:
                 print('in run thread, send ', cmd)
             self.cmd_event.clear()
@@ -788,254 +759,202 @@ class TelloNode:
 
     def update_cmd(self):
         print('update cmd thread start....')
-        pose = self.pose.get()
-        self.pose.put(pose)
-        old_time = time.time()
         cmd = ''
-        camera_flag = 1
-        count = 0
-        # time2 = time.time()
-        if pose[2] == 85:
-            self.target.value = ','.join(map(str, self.init_pose)).encode()
-            time.sleep(0.1)
-            while self.permission_flag.value == 0:
-                # print('wait for permission of ', self.tello_ip, self.permission_flag.value)
-                if time.time() - old_time >= 5:
-                    with self.cmd.get_lock():
-                        self.cmd.value = b'>command'
-                        print('update cmd, >command')
-                    self.cmd_event.set()
-                    old_time = time.time()
-                time.sleep(0.1)
-            self.permission_flag.value = 0
-            while self.Res_flag.value == 0:
-                time.sleep(0.1)
-            with self.Res_flag.get_lock():
-                self.Res_flag.value = 0
-            with self.cmd.get_lock():
-                # self.cmd.value = b'>takeoff'
-                self.cmd.value = b'>takeoff'
-            self.cmd_event.set()
-            # print('update cmd, >takeoff')
-            while self.Res_flag.value == 0:
-                time.sleep(0.1)
-            with self.Res_flag.get_lock():
-                self.Res_flag.value = 0
-            self.pose.put(self.update_pos('>takeoff', self.pose.get()))
-            tmp = self.pose.get()
-            self.pose.put(tmp)
-            self.target.value = ','.join(map(str, tmp)).encode()
-            with self.cmd.get_lock():
-                self.cmd.value = b'>up 100'
-            self.cmd_event.set()
-            while self.Res_flag.value == 0:
-                time.sleep(0.1)
-            with self.Res_flag.get_lock():
-                self.Res_flag.value = 0
-            self.pose.put(self.update_pos('>up 100', self.pose.get()))
-            # self.cmd_res.get()
-            with self.cmd.get_lock():
-                self.cmd.value = b'>streamon'
-            self.cmd_event.set()
-            # print('update cmd, >up 130')
-            while self.Res_flag.value == 0:
-                time.sleep(0.1)
-            with self.Res_flag.get_lock():
-                self.Res_flag.value = 0
-            # self.cmd_res.get()
-            self.pose.put(self.update_pos('>streamon', self.pose.get()))
-            with self.cmd.get_lock():
-                self.cmd.value = b'>command'
-            self.cmd_event.set()
-            time.sleep(3)
-            self.pose.put(self.update_pos('>command', self.pose.get()))
-            # old_time = time.time()
-            # while self.Res_flag.value == 0:
-            #     if time.time() - old_time > 5:
-            #         with self.cmd.get_lock():
-            #             self.cmd.value = ('>' + cmd).encode()
-            #         self.cmd_event.set()
-            #         old_time = time.time()
-            #     time.sleep(0.1)
-            # with self.Res_flag.get_lock():
-            #     self.Res_flag.value = 0
-            # # self.cmd_res.get()
-            # self.pose.put(self.update_pos('>setersolution low', self.pose.get()))
-            # with self.cmd.get_lock():
-            #     self.cmd.value = b'>setresolution low'
-            # self.cmd_event.set()
-            # print('update cmd, >setresolution low')
-            # while self.Res_flag.value == 0:
-            #     time.sleep(0.1)
-            # with self.Res_flag.get_lock():
-            #     self.Res_flag.value = 0
-            # # self.cmd_res.get()
-            # self.pose.put(self.update_pos('>setfps high', self.pose.get()))
-            # with self.cmd.get_lock():
-            #     self.cmd.value = b'>setfps high'
-            # self.cmd_event.set()
-            # # print('update cmd, >setfps high')
-            self.takeoff_flag.value = 0
         while True:
-            # print('in update cmd, main alg {}'.format(self.main_flag.value))
-            # print('in update cmd, permission {}'.format(self.permission_flag.value))
-            # self.update_path_event.wait()
-            # pose = self.pose.get()
-            # self.pose.put(pose)
-            # print('path lock acquired by cmd')
-            # if self.path.empty() is True:
-            #     print('in run thread, path queue is empty, wait for path updating..', self.tello_ip)
-            #     while self.Res_flag.value == 0:
-            #         time.sleep(0.1)
-            #     with self.Res_flag.get_lock():
-            #         self.Res_flag.value = 0
-            #     # self.cmd_res.get()
-            #     with self.cmd.get_lock():
-            #         self.cmd.value = b'wait 10'
-            #     self.cmd_event.set()
-            #     print('update cmd, wait 10')
-            #     time.sleep(10)
-            #     if self.path.empty() is True:
-            #         print('in run thread, no path updated, break...', self.tello_ip)
-            #         break
-            # count = count + 1
-            # time.sleep(0.1)
-            print("--------------------------")
-            old_time = time.time()
-            while self.permission_flag.value == 0:
-                # print('wait for permission, 2', self.permission_flag.value)
-                # print('wait for permission of ', self.tello_ip, self.permission_flag.value)
-                if time.time() - old_time >= 5:
-                    with self.cmd.get_lock():
-                        self.cmd.value = b'>command'
-                        # print('update cmd, >command')
-                    self.cmd_event.set()
-                    old_time = time.time()
-                time.sleep(0.2)
-            self.permission_flag.value = 0
-            old_time = time.time()
-            if self.main_flag.value == 1:
-                break
-            while self.Res_flag.value == 0:
-                if time.time() - old_time > 5:
-                    with self.cmd.get_lock():
-                        self.cmd.value = ('>command').encode()
-                    self.cmd_event.set()
-                    old_time = time.time()
+            # print(self.takeoff_flag.value)
+            # print(self.takeoff_command.value)
+            if self.takeoff_command.value == 1:
+                pose = self.pose.get()
+                self.pose.put(pose)
+                old_time = time.time()
+                cmd = ''
+                self.target.value = ','.join(map(str, self.init_pose)).encode()
                 time.sleep(0.1)
-            with self.Res_flag.get_lock():
-                self.Res_flag.value = 0
-            self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
-            pose = self.pose.get()
-            self.pose.put(pose)
-            self.update_path_event.wait()
-            target = self.path.get()
-            if self.path.empty() is True:
-                self.path_empty_flag.value = 1
-                self.path.put(target)
-                time.sleep(1)
-            else:
-                self.path_empty_flag.value = 0
-            self.target.value = ','.join(map(str, target)).encode()
-            print("target:{}".format(target))
-            if np.linalg.norm(target[0:3] - pose[0:3]) < 50:
-                cmd = 'command'
+                while self.permission_flag.value == 0:
+                    if time.time() - old_time >= 5:
+                        with self.cmd.get_lock():
+                            self.cmd.value = b'>command'
+                            print('update cmd, >command')
+                        self.cmd_event.set()
+                        old_time = time.time()
+                    time.sleep(0.1)
+                self.permission_flag.value = 0
+                while self.Res_flag.value == 0:
+                    time.sleep(0.1)
+                with self.Res_flag.get_lock():
+                    self.Res_flag.value = 0
                 with self.cmd.get_lock():
-                    self.cmd.value = ('>' + cmd).encode()
+                    self.cmd.value = b'>takeoff'
                 self.cmd_event.set()
-            else:
-                alpha = pose[3] * 3.1416 / 180
-                m = np.array([[np.cos(alpha), np.sin(alpha), 0],
-                              [-np.sin(alpha), np.cos(alpha), 0],
-                              [0, 0, 1]])
-                tmp = target[0:3] - pose[0:3]
-                tmp = np.dot(m, tmp)
-                if abs(tmp[0]) + abs(tmp[1]) > 50:
-                    if tmp[2] > 15:
-                        tmp[2] = 15
-                    elif tmp[2] < -15:
-                        tmp[2] = -15
-                tmp = np.append(tmp, 100)
-                tmp = [int(i) for i in tmp]
-                tmp = [str(i) for i in tmp]
-                cmd = 'go ' + ' '.join(tmp)
+                while self.Res_flag.value == 0:
+                    time.sleep(0.1)
+                with self.Res_flag.get_lock():
+                    self.Res_flag.value = 0
+                self.pose.put(self.update_pos('>takeoff', self.pose.get()))
+                tmp = self.pose.get()
+                self.pose.put(tmp)
+                self.target.value = ','.join(map(str, tmp)).encode()
+                with self.cmd.get_lock():
+                    self.cmd.value = b'>up 100'
+                self.cmd_event.set()
+                while self.Res_flag.value == 0:
+                    time.sleep(0.1)
+                with self.Res_flag.get_lock():
+                    self.Res_flag.value = 0
+                self.pose.put(self.update_pos('>up 100', self.pose.get()))
+                with self.cmd.get_lock():
+                    self.cmd.value = b'>streamon'
+                self.cmd_event.set()
+                while self.Res_flag.value == 0:
+                    time.sleep(0.1)
+                with self.Res_flag.get_lock():
+                    self.Res_flag.value = 0
+                self.pose.put(self.update_pos('>streamon', self.pose.get()))
+                with self.cmd.get_lock():
+                    self.cmd.value = b'>command'
+                self.cmd_event.set()
+                time.sleep(3)
+                self.pose.put(self.update_pos('>command', self.pose.get()))
+                self.takeoff_command.value = 0
+                self.takeoff_flag.value = 1
+                print("--------------------------")
+            if self.takeoff_flag.value == 1:
+                old_time = time.time()
+                while self.permission_flag.value == 0:
+                    # print('wait for permission, 2', self.permission_flag.value)
+                    # print('wait for permission of ', self.tello_ip, self.permission_flag.value)
+                    if time.time() - old_time >= 5:
+                        with self.cmd.get_lock():
+                            self.cmd.value = b'>command'
+                            # print('update cmd, >command')
+                        self.cmd_event.set()
+                        old_time = time.time()
+                    time.sleep(0.2)
+                self.permission_flag.value = 0
+                old_time = time.time()
+                if self.main_flag.value == 1:
+                    break
+                while self.Res_flag.value == 0:
+                    if time.time() - old_time > 5:
+                        with self.cmd.get_lock():
+                            self.cmd.value = ('>command').encode()
+                        self.cmd_event.set()
+                        old_time = time.time()
+                    time.sleep(0.1)
+                with self.Res_flag.get_lock():
+                    self.Res_flag.value = 0
+                self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
+                pose = self.pose.get()
+                self.pose.put(pose)
+                self.update_path_event.wait()
+                target = self.path.get()
+                if self.path.empty() is True:
+                    self.path_empty_flag.value = 1
+                    self.path.put(target)
+                    time.sleep(1)
+                else:
+                    self.path_empty_flag.value = 0
+                self.target.value = ','.join(map(str, target)).encode()
+                print("target:{}".format(target))
+                if np.linalg.norm(target[0:3] - pose[0:3]) < 50:
+                    cmd = 'command'
+                    with self.cmd.get_lock():
+                        self.cmd.value = ('>' + cmd).encode()
+                    self.cmd_event.set()
+                else:
+                    alpha = pose[3] * 3.1416 / 180
+                    m = np.array([[np.cos(alpha), np.sin(alpha), 0],
+                                  [-np.sin(alpha), np.cos(alpha), 0],
+                                  [0, 0, 1]])
+                    tmp = target[0:3] - pose[0:3]
+                    tmp = np.dot(m, tmp)
+                    if abs(tmp[0]) + abs(tmp[1]) > 50:
+                        if tmp[2] > 15:
+                            tmp[2] = 15
+                        elif tmp[2] < -15:
+                            tmp[2] = -15
+                    tmp = np.append(tmp, 100)
+                    tmp = [int(i) for i in tmp]
+                    tmp = [str(i) for i in tmp]
+                    cmd = 'go ' + ' '.join(tmp)
+                    if self.main_flag.value == 1:
+                        while self.path.empty() is False:
+                            self.path.get()
+                        break
+                    # self.cmd_res.get()
+                    try:
+                        with self.cmd.get_lock():
+                            self.cmd.value = ('>' + cmd).encode()
+                        self.cmd_event.set()
+                    except ValueError:
+                        print(cmd)
+                        with self.cmd.get_lock():
+                            self.cmd.value = b'>command'
+                        self.cmd_event.set()
+                    # print('update cmd, >' + cmd)
+                    # self.send_command('>' + cmd)
+                # print('path lock released by cmd')
                 if self.main_flag.value == 1:
                     while self.path.empty() is False:
                         self.path.get()
                     break
-                # self.cmd_res.get()
-                try:
-                    with self.cmd.get_lock():
-                        self.cmd.value = ('>' + cmd).encode()
-                    self.cmd_event.set()
-                except ValueError:
-                    print(cmd)
-                    with self.cmd.get_lock():
-                        self.cmd.value = b'>command'
-                    self.cmd_event.set()
-                # print('update cmd, >' + cmd)
-                # self.send_command('>' + cmd)
-            # print('path lock released by cmd')
-            if self.main_flag.value == 1:
-                while self.path.empty() is False:
-                    self.path.get()
-                break
-            old_time = time.time()
-            while self.Res_flag.value == 0:
-                if time.time() - old_time > 5:
-                    with self.cmd.get_lock():
-                        self.cmd.value = ('>' + cmd).encode()
-                    self.cmd_event.set()
-                    old_time = time.time()
-                time.sleep(0.1)
-            with self.Res_flag.get_lock():
-                self.Res_flag.value = 0
-            self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
-            pose = self.pose.get()
-            self.pose.put(pose)
-            # print("before turn , pose:{}, target:{}", pose, target)
-            theta = target[3] - pose[3]
-            if abs(theta) >= 3:
-                if theta < 0:
-                    if abs(theta) > 180:
-                        cmd = 'ccw ' + str(theta + 360)
-                        # self.cmd_res.get()
+                old_time = time.time()
+                while self.Res_flag.value == 0:
+                    if time.time() - old_time > 5:
                         with self.cmd.get_lock():
                             self.cmd.value = ('>' + cmd).encode()
                         self.cmd_event.set()
-                        # print('update cmd, >' + cmd)
-                        # self.send_command(">" + cmd)
+                        old_time = time.time()
+                    time.sleep(0.1)
+                with self.Res_flag.get_lock():
+                    self.Res_flag.value = 0
+                self.pose.put(self.update_pos('>' + cmd, self.pose.get()))
+                pose = self.pose.get()
+                self.pose.put(pose)
+                # print("before turn , pose:{}, target:{}", pose, target)
+                theta = target[3] - pose[3]
+                if abs(theta) >= 3:
+                    if theta < 0:
+                        if abs(theta) > 180:
+                            cmd = 'ccw ' + str(theta + 360)
+                            # self.cmd_res.get()
+                            with self.cmd.get_lock():
+                                self.cmd.value = ('>' + cmd).encode()
+                            self.cmd_event.set()
+                            # print('update cmd, >' + cmd)
+                            # self.send_command(">" + cmd)
+                        else:
+                            cmd = 'ccw ' + str(theta)
+                            with self.cmd.get_lock():
+                                self.cmd.value = ('>' + cmd).encode()
+                            self.cmd_event.set()
+                            # print('update cmd, >' + cmd)
+                            # self.send_command(">" + cmd)
                     else:
-                        cmd = 'ccw ' + str(theta)
-                        with self.cmd.get_lock():
-                            self.cmd.value = ('>' + cmd).encode()
-                        self.cmd_event.set()
-                        # print('update cmd, >' + cmd)
-                        # self.send_command(">" + cmd)
+                        if abs(theta) > 180:
+                            cmd = 'ccw ' + str(theta - 360)
+                            # self.cmd_res.get()
+                            with self.cmd.get_lock():
+                                self.cmd.value = ('>' + cmd).encode()
+                            self.cmd_event.set()
+                            # print('update cmd, >' + cmd)
+                            # self.send_command(">" + cmd)
+                        else:
+                            cmd = 'ccw ' + str(theta)
+                            with self.cmd.get_lock():
+                                self.cmd.value = ('>' + cmd).encode()
+                            self.cmd_event.set()
+                            # print('update cmd, >' + cmd)
+                            # self.send_command(">" + cmd)
                 else:
-                    if abs(theta) > 180:
-                        cmd = 'ccw ' + str(theta - 360)
-                        # self.cmd_res.get()
-                        with self.cmd.get_lock():
-                            self.cmd.value = ('>' + cmd).encode()
-                        self.cmd_event.set()
-                        # print('update cmd, >' + cmd)
-                        # self.send_command(">" + cmd)
-                    else:
-                        cmd = 'ccw ' + str(theta)
-                        with self.cmd.get_lock():
-                            self.cmd.value = ('>' + cmd).encode()
-                        self.cmd_event.set()
-                        # print('update cmd, >' + cmd)
-                        # self.send_command(">" + cmd)
-            else:
-                cmd = 'command'
-                with self.cmd.get_lock():
-                    self.cmd.value = ('>' + cmd).encode()
-                self.cmd_event.set()
+                    cmd = 'command'
+                    with self.cmd.get_lock():
+                        self.cmd.value = ('>' + cmd).encode()
+                    self.cmd_event.set()
+                time.sleep(0.1)
+                if self.main_flag.value == 1:
+                    break
             time.sleep(0.1)
-            if self.main_flag.value == 1:
-                break
         while self.Res_flag.value == 0:
             time.sleep(0.1)
             if self.main_flag.value == 1:
