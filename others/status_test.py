@@ -2,7 +2,7 @@
 # @Time    : 2021/1/1 下午4:50
 # @Author  : JakeShihao Luo
 # @Email   : jakeshihaoluo@gmail.com
-# @File    : main.py
+# @File    : 0.py
 # @Software: PyCharm
 
 from scanner import *
